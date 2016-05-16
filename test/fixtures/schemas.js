@@ -33,7 +33,7 @@ module.exports = {
     .clusteringKey('album_id')
     .rename('id', 'album_id', { ignoreUndefined: true }),
   song: joi.object({
-    song_id: cql.uuid(),
+    song_id: cql.uuid({ default: 'v4' }),
     unique_id: cql.uuid(),
     other_id: cql.uuid(),
     name: cql.text(),

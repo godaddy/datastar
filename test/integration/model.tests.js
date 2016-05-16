@@ -599,6 +599,28 @@ describe('Model', function () {
       }, done);
     });
 
+    it('should not insert a different value for the partition key in the lookup tables', function (done) {
+      var thisUniqueId = '9adc5c0e-6de5-4cf2-9b96-143f82caba64';
+      var thisOtherId = 'd416d385-c57d-4db9-9e37-ca04cb9fceb0';
+      Song.create({
+        otherId: thisOtherId,
+        uniqueId: thisUniqueId
+      }, function (err) {
+        if (err) return void done(err);
+
+        Song.findOne({ otherId: thisOtherId }, function (e, songByOtherId) {
+          if (e) return void done(e);
+
+          Song.findOne({ uniqueId: thisUniqueId }, function (er, songByUniqueId) {
+            if (er) return void done(er);
+
+            assume(songByUniqueId.id).to.equal(songByOtherId.id);
+            done();
+          });
+        });
+      });
+    });
+
     it('should be able to find by all the `primaryKeys` and return the same value', function (done) {
       findOneAll(function (err, result) {
         assume(err).is.falsey();
