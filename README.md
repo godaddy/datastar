@@ -1,5 +1,8 @@
 # datastar
 
+[![Build
+Status](https://travis-ci.org/godaddy/datastar.svg?branch=master)](https://travis-ci.org/godaddy/datastar)
+
 > "Now witness the power of this FULLY ARMED AND OPERATIONAL DATASTAR!"
 
 ```
@@ -167,7 +170,7 @@ var Album = datastar.define('album', {
 
 #### Consistency
 
-Since Cassandra is a distributed database, we need a way to specify what our 
+Since Cassandra is a distributed database, we need a way to specify what our
 consistency threshold is for both reading and writing from the database. We can
 set `consistency`, `readConsistency` and `writeConsistency` when we define our
 model. `consistency` is used if you want to set both to be the same threshold
@@ -269,7 +272,7 @@ In our example above we added `name` as a `lookupKey` to our `Artist` model. Thi
    primary key of a different table.
 4. When updating an `Artist`, a fully formed `previous` value must be given or
    else an implicit `find` operation will happen in order to properly assess if
-   a `lookupKey` has changed. 
+   a `lookupKey` has changed.
 
 Keeping these restrictions in mind, we can now have fast lookups by `name` without having to worry about too much.
 
@@ -387,7 +390,7 @@ table to get the latest record before executing the update. This `previous`
 value is required because we have to detect whether a `primaryKey` of a lookup
 table has changed.
 
- __IMPORTANT__: 
+ __IMPORTANT__:
  > If you have a case where you are modifying the `primaryKey` of a
  > lookup table and you are PASSING IN the previous value into the `update`
  > function, that `previous` value MUST be a fully formed object of the previous
@@ -449,7 +452,7 @@ Person.update({
 });
 
 //
-// If I want to update the primary key of the entity I would need to do something as follows 
+// If I want to update the primary key of the entity I would need to do something as follows
 // (this also shows changing the lookup table primary key at the same time)
 //
 
@@ -457,7 +460,7 @@ Person.remove(previous, function(err) {
   if (err) /* handle me */ return;
   previous.name = 'Barney Rubble';
   previous.personId = '12345678-1234-1234-1234-123456789012'
-  
+
   Person.create(previous, function (err) {
     if (err) /* handle me */ return;
     /* successful create */
@@ -691,24 +694,24 @@ in both the **partition keys of the main table AND the lookup table**.
 //
 // Going back to our `person` model..
 //
-Person.remove({ 
-  personId: '12345678-1234-1234-1234-123456789012', 
-  name: 'steve belaruse' 
+Person.remove({
+  personId: '12345678-1234-1234-1234-123456789012',
+  name: 'steve belaruse'
 }, function(err) {
-  if (err) /* handle me */ return; 
+  if (err) /* handle me */ return;
   console.log('Successfully removed artist');
 });
 ```
 
 This is necessary because a `lookupKey` defines the partition key of a different
-table that is created for lookups. 
+table that is created for lookups.
 
 ### Model hooks
 
-Arguably one of the most powerful features hidden in `datastar` are the model hooks or life-cycle events 
+Arguably one of the most powerful features hidden in `datastar` are the model hooks or life-cycle events
 that allow you to hook into and  modify the execution of a given statement. First let's define the operations and the hooks that they have associated.
 
- 
+
 |          Operation                  | Life-cycle event / model hook   |
 |-------------------------------------|---------------------------------|
 |create, upsert, remove, ensure-tables|  build, execute                 |
@@ -743,7 +746,7 @@ Beverage.before('create:build', function (options, callback) {
           : ent[key];
 
         return acc;
-      }, {}) 
+      }, {})
     });
   }
   //
@@ -769,7 +772,7 @@ Beverage.before('create:execute', function (options, callback) {
     //
     options.statements.strategy = 7;
   }
-  
+
 
   callback();
 });
@@ -779,7 +782,7 @@ Beverage.before('create:execute', function (options, callback) {
 // insert the same data into a separate keyspace using a different `Priam`
 // instance. Which would be a separate connection to cassandra. This call is
 // ensured to be executed before the `Beverage.create(opts, callback)` function
-// calls its callback. 
+// calls its callback.
 // NOTE: This assumes the same columns exist in this other keyspace
 //
 var otherDataCenterConnection = new Priam(connectOpts);
@@ -813,7 +816,7 @@ Beverage.after('find:one', function (result, callback) {
   //
   // Populate associated sibling models on every `findOne` or `get` query
   //
-  async.map(result.siblings, 
+  async.map(result.siblings,
     function (id, next) {
     Beverage.get(id, next);
   }, function (err, siblingModels) {
@@ -940,7 +943,7 @@ Spice.dropTables(function (err) {
 
 Its as simple as that. We will drop the spice table and any associated Lookup
 Tables if they were configured. With `.dropTables` and `.ensureTables` it's
-super easy to use `datastar` as a building block for managing all of your Cassandra 
+super easy to use `datastar` as a building block for managing all of your Cassandra
 tables without executing any manual `CQL`.
 
 ### Statement Building
@@ -962,12 +965,12 @@ We make a few assumptions which have manifested as conventions in this library.
    expect. It just may be unintuitive if you look at the cassandra tables
    directly and do not see `null` values.
 
-   This prevents tombstones from being created which has been crucial for our 
-   production uses of cassandrai at GoDaddy. This is something that could be configurable 
-   in the future. 
+   This prevents tombstones from being created which has been crucial for our
+   production uses of cassandrai at GoDaddy. This is something that could be configurable
+   in the future.
 
-2. Casing, as mentioned briefly in the warning at the top of the readme, we assume 
-   `camelCase` as the casing convention when interacting with datastar and the 
+2. Casing, as mentioned briefly in the warning at the top of the readme, we assume
+   `camelCase` as the casing convention when interacting with datastar and the
    models created with it. The schema is the only place where the keys used MUST
    be written as `snake_case`.
 
