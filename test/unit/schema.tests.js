@@ -1,13 +1,15 @@
 'use strict';
 
-var assume  = require('assume'),
-    joi     = require('joi-of-cql'),
-    helpers = require('../helpers'),
-    schemas = require('../fixtures/schemas'),
-    Schema  = require('../../lib/schema');
+var assume            = require('assume'),
+    datastarTestTools = require('datastar-test-tools'),
+    joi               = require('joi-of-cql'),
+    schemas           = require('../fixtures/schemas'),
+    Schema            = require('../../lib/schema');
 
-var debug  = helpers.debug,
-    cql = joi.cql;
+var helpers = datastarTestTools.helpers;
+
+var debug = helpers.debug,
+    cql   = joi.cql;
 
 describe('Schema (unit)', function () {
   var schema;
@@ -25,12 +27,19 @@ describe('Schema (unit)', function () {
     var invalid = joi.object({
       id: cql.uuid()
     });
-    function init() { Schema('invalid', invalid); }
+
+    function init() {
+      Schema('invalid', invalid);
+    }
+
     assume(init).throws(/must define a partitionKey/);
   });
 
   it('should throw an error when given an invalid name for the schema', function () {
-    function init() { Schema('has-dashes'); }
+    function init() {
+      Schema('has-dashes');
+    }
+
     assume(init).throws('Invalid character in schema name');
   });
 

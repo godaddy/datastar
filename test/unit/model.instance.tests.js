@@ -1,10 +1,13 @@
 'use strict';
 
-var assume  = require('assume'),
-    helpers = require('../helpers'),
-    mocks   = require('../mocks'),
-    entity  = require('../fixtures/dog'),
-    schemas = require('../fixtures/schemas');
+var assume            = require('assume'),
+
+    dataStarTestTools = require('datastar-test-tools'),
+    entity            = require('../fixtures/dog'),
+    schemas           = require('../fixtures/schemas');
+
+var helpers = dataStarTestTools.helpers,
+    mocks   = dataStarTestTools.mocks;
 
 assume.use(require('assume-sinon'));
 

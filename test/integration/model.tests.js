@@ -2,12 +2,14 @@
 
 /*jshint camelcase: false */
 
-var assume  = require('assume'),
-    uuid    = require('uuid'),
-    async   = require('async'),
-    clone   = require('clone'),
-    helpers = require('../helpers'),
-    schemas = require('../fixtures/schemas');
+var assume            = require('assume'),
+    uuid              = require('uuid'),
+    async             = require('async'),
+    clone             = require('clone'),
+    schemas           = require('../fixtures/schemas'),
+    datastarTestTools = require('datastar-test-tools');
+
+var helpers = datastarTestTools.helpers;
 
 /*eslint no-invalid-this: 1*/
 describe('Model', function () {
@@ -779,7 +781,7 @@ describe('Model', function () {
       });
     });
 
-    it('should run a find query with a limit of 1 and return 1 record' , function (done) {
+    it('should run a find query with a limit of 1 and return 1 record', function (done) {
       Foo.findAll({ conditions: {}, limit: 1 }, function (err, recs) {
         assume(err).is.falsey();
         assume(recs.length).equals(1);
