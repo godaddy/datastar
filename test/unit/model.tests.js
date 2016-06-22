@@ -1,11 +1,13 @@
 'use strict';
 
-var assume  = require('assume'),
-    uuid    = require('uuid'),
-    helpers = require('../helpers'),
-    mocks   = require('../mocks'),
-    schemas = require('../fixtures/schemas'),
-    sinon   = require('sinon');
+var assume            = require('assume'),
+    uuid              = require('uuid'),
+    datastarTestTools = require('datastar-test-tools'),
+    schemas           = require('../fixtures/schemas'),
+    sinon             = require('sinon');
+
+var helpers = datastarTestTools.helpers,
+    mocks   = datastarTestTools.mocks;
 
 assume.use(require('assume-sinon'));
 

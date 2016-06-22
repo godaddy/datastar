@@ -24,6 +24,7 @@
     "assume-sinon": "0.0.0",
     "babel-eslint": "^5.0.0",
     "cassandra-driver": "^3.0.2",
+    "datastar-test-tools": "~1.0.0",
     "eslint-plugin-json": "^1.2.0",
     "eslint-plugin-mocha": "^1.1.0",
     "eslint-plugin-react": "^3.16.1",
