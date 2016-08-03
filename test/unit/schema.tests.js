@@ -74,4 +74,17 @@ describe('Schema (unit)', function () {
     assume(valid).eql(schema.fixKeys(entity));
     debug(valid);
   });
+
+  it('#fieldString() should return a list of all fields suitable for CQL ' +
+     'consumption if no arguments are given', function () {
+    schema = new Schema('artist', schemas.artist);
+    assume(schema.fieldString()).eql(
+      '"artist_id", "name", "create_date", "update_date", "members", "related_artists", "traits", "metadata"');
+  });
+
+  it('#fieldString() should return a list of fields suitable for CQL ' +
+     'consumption when a list of fields is given', function () {
+    schema = new Schema('artist', schemas.artist);
+    assume(schema.fieldString(['artist_id', 'name'])).eql('"artist_id", "name"');
+  });
 });

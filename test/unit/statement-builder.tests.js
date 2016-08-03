@@ -21,12 +21,21 @@ var artistEntity = require(path.join(fixturesDir, 'artist-entity'));
 describe('StatementBuilder', function () {
   var schema = new Schema('artist', schemas.artist);
   var builder = new StatementBuilder(schema);
+  var fieldList = schema.fieldString();
 
   describe('FindStatement', function () {
     it('should return an find ALL statement if given an empty object or no options', function () {
       var statement = builder.find({ type: 'find' }, {});
 
-      assume(statement.cql).to.equal('SELECT * FROM artist');
+      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist');
+    });
+
+    it('should return an find statement with a field list if fields in options', function () {
+      var statement = builder.find({
+        type: 'find',
+        fields: ['artist_id', 'name']
+      }, {});
+      assume(statement.cql).to.equal('SELECT "artist_id", "name" FROM artist');
     });
 
     it('should return a find statement with a limit if specified in options', function () {
@@ -35,7 +44,7 @@ describe('StatementBuilder', function () {
         limit: 2
       }, {});
 
-      assume(statement.cql).to.equal('SELECT * FROM artist LIMIT 2');
+      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist LIMIT 2');
     });
 
     it('should return an error when passed conditions that get filtered (non primary keys)', function () {
