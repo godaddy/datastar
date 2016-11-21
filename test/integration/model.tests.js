@@ -113,7 +113,20 @@ describe('Model', function () {
               assume(result.metadata.what).to.equal(update.metadata.what);
               assume(result.relatedArtists.sort()).to.deep.equal(update.relatedArtists.sort());
 
-              Artist.remove(entity, done);
+              //
+              // By passing a null we set the map value to null
+              //
+              Artist.update({
+                id: entity.id,
+                metadata: {
+                  hello: null
+                }
+              }, function (err, result) {
+                assume(err).to.be.falsey();
+                assume(result.metadata.hello).to.be.falsey();
+
+                Artst.remove(entity, done);
+              });
             });
           });
         });
