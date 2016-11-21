@@ -7,6 +7,7 @@ var assume            = require('assume'),
     async             = require('async'),
     clone             = require('clone'),
     schemas           = require('../fixtures/schemas'),
+    Datastar          = require('../..'),
     datastarTestTools = require('datastar-test-tools');
 
 var helpers = datastarTestTools.helpers;
@@ -19,7 +20,7 @@ describe('Model', function () {
   before(function (done) {
     helpers.load(function (err, data) {
       assume(err).to.equal(null);
-      datastar = helpers.connectDatastar({ config: data.cassandra }, null, done);
+      datastar = helpers.connectDatastar({ config: data.cassandra }, Datastar, done);
       /* cassandra = new driver.Client({
        contactPoints: data.cassandra.hosts,
        keyspace: data.cassandra.keyspace
@@ -113,7 +114,22 @@ describe('Model', function () {
               assume(result.metadata.what).to.equal(update.metadata.what);
               assume(result.relatedArtists.sort()).to.deep.equal(update.relatedArtists.sort());
 
-              Artist.remove(entity, done);
+              //
+              // By passing a null we set the map value to null
+              //
+              Artist.update({
+                id: entity.id,
+                metadata: {
+                  hello: null
+                }
+              }, function (err) {
+                assume(err).is.falsey();
+                find(Artist, entity.id, function (_, result) {
+                  assume(result.metadata.hello).is.falsey();
+
+                  Artist.remove(entity, done);
+                });
+              });
             });
           });
         });
@@ -124,7 +140,6 @@ describe('Model', function () {
       // SELECT [fields] FROM [table] WHERE [conditions.query[0]] AND [conditionals.query[1]] FROM [schema.name]
       var options = {
         type: 'all',
-        fields: ['*'],
         conditions: {
           artistId: '00000000-0000-0000-0000-000000000002'
         }
@@ -156,7 +171,6 @@ describe('Model', function () {
 
       var findOptions = {
         type: 'all',
-        fields: ['*'],
         conditions: {
           artistId: id
         }
