@@ -126,7 +126,7 @@ describe('Model', function () {
                 find(Artist, entity.id, function (_, result) {
                   assume(result.metadata.hello).is.falsey();
 
-                  Artst.remove(entity, done);
+                  Artist.remove(entity, done);
                 });
               });
             });
