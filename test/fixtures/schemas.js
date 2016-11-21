@@ -16,7 +16,7 @@ module.exports = {
     members: cql.set(cql.text()),
     related_artists: cql.set(cql.uuid()).allow(null),
     traits: cql.set(cql.text()),
-    metadata: cql.map(cql.text(), cql.text())
+    metadata: cql.map(cql.text(), cql.text().allow(null))
   }).partitionKey('artist_id')
     .rename('id', 'artist_id', { ignoreUndefined: true }),
   album: joi.object({
