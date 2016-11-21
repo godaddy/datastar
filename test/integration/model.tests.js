@@ -121,11 +121,13 @@ describe('Model', function () {
                 metadata: {
                   hello: null
                 }
-              }, function (err, result) {
-                assume(err).to.be.falsey();
-                assume(result.metadata.hello).to.be.falsey();
+              }, function (err) {
+                assume(err).is.falsey();
+                find(Artist, entity.id, function (_, result) {
+                  assume(result.metadata.hello).is.falsey();
 
-                Artst.remove(entity, done);
+                  Artst.remove(entity, done);
+                });
               });
             });
           });
