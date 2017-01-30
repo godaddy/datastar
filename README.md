@@ -714,7 +714,7 @@ that allow you to hook into and  modify the execution of a given statement. Firs
 
 |          Operation                  | Life-cycle event / model hook   |
 |-------------------------------------|---------------------------------|
-|create, upsert, remove, ensure-tables|  build, execute                 |
+|create, update, remove, ensure-tables|  build, execute                 |
 | find                                |  all, count, one, first         |
 
 `datastar` utilizes a module called [`Understudy`][understudy] under the hood.
