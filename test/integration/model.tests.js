@@ -759,6 +759,9 @@ describe('Model', function () {
     var four = uuid.v4();
     var five = uuid.v4();
     var six = uuid.v4();
+    var seven = uuid.v4();
+    var eight = uuid.v4();
+
     var Foo;
 
     after(function (done) {
@@ -803,14 +806,19 @@ describe('Model', function () {
       Foo.create({ entity: { fooId: three }, ttl: 3 }, function (err) {
         assume(err).is.falsey();
 
-        setTimeout(function () {
-          Foo.findOne({ fooId: three }, function (err, result) {
-            assume(err).is.falsey();
-            assume(result).is.falsey();
-            done();
-          });
-        }, 3000);
+        Foo.findOne({ fooId: three }, function (error, res) {
+          assume(err).is.falsey();
+          assume(res);
+          assume(res.fooId).equals(three);
 
+          setTimeout(function () {
+            Foo.findOne({ fooId: three }, function (er, result) {
+              assume(er).is.falsey();
+              assume(result).is.falsey();
+              done();
+            });
+          }, 3000);
+        });
       });
     });
 
@@ -818,31 +826,110 @@ describe('Model', function () {
       Foo.create({ entity: { fooId: four }, ttl: 7 }, function (err) {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: four }, function (err, result) {
+        Foo.findOne({ fooId: four }, function (err, res) {
           assume(err).is.falsey();
-          assume(result);
-          assume(result.fooId).equals(four);
+          assume(res);
+          assume(res.fooId).equals(four);
+
           setTimeout(function () {
             Foo.findOne({ fooId: four }, function (err, result) {
               assume(err).is.falsey();
-              assume(result).is.falsey();
+              assume(result);
+              assume(result.fooId).equals(four);
               done();
             });
-          }, 7000);
+          }, 3000);
         });
       });
     });
 
     it('should update a record in the database that will expire with given ttl', function (done) {
-      Foo.update({ entity: { fooId: five , something: 'foo' }, ttl: 2 }, function (err) {
+      Foo.update({ entity: { fooId: five, something: 'foo' }, ttl: 2 }, function (err) {
         assume(err).is.falsey();
-        setTimeout(function () {
-          Foo.findOne({ fooId: five }, function (err, res) {
-            assume(err).is.falsey();
-            assume(res).is.falsey();
-            done();
+
+        Foo.findOne({ fooId: five }, function (error, result) {
+          assume(error).is.falsey();
+          assume(result);
+          assume(result.fooId).equals(five);
+
+          setTimeout(function () {
+            Foo.findOne({ fooId: five }, function (er, res) {
+              assume(er).is.falsey();
+              assume(res).is.falsey();
+              done();
+            });
+          }, 5000);
+        });
+      });
+    });
+
+    it('should update a record in the database that can be found before it reaches ttl', function (done) {
+      Foo.update({ entity: { fooId: six, something: 'foo' }, ttl: 5 }, function (err) {
+        assume(err).is.falsey();
+
+        Foo.findOne({ fooId: six }, function (error, result) {
+          assume(error).is.falsey();
+          assume(result);
+          assume(result.fooId).equals(six);
+
+          setTimeout(function () {
+            Foo.findOne({ fooId: six }, function (er, res) {
+              assume(er).is.falsey();
+              assume(res);
+              assume(res.fooId).equals(six);
+              done();
+            });
+          }, 2000);
+        });
+      });
+    });
+
+    it('should update a record in the database with an updated reset ttl and can be found before it reaches the updated ttl', function (done) {
+      Foo.update({ entity: { fooId: seven, something: 'boo' }, ttl: 3 }, function (err) {
+        assume(err).is.falsey();
+
+        Foo.findOne({ fooId: seven }, function (error, result) {
+          assume(error).is.falsey();
+          assume(result);
+          assume(result.fooId).equals(seven);
+
+          Foo.update({ entity: { fooId: seven, something: 'foo' }, ttl: 10 }, function (error) {
+            assume(error).is.falsey();
+
+            setTimeout(function () {
+              Foo.findOne({ fooId: seven }, function (er, res) {
+                assume(er).is.falsey();
+                assume(res);
+                assume(res.fooId).equals(seven);
+                done();
+              });
+            }, 5000);
           });
-        }, 5000);
+        });
+      });
+    });
+
+    it('should update a record in the database with an updated reset ttl and expire after it reaches the updated ttl', function (done) {
+      Foo.update({ entity: { fooId: eight, something: 'boo' }, ttl: 2 }, function (err) {
+        assume(err).is.falsey();
+
+        Foo.findOne({ fooId: eight }, function (error, result) {
+          assume(error).is.falsey();
+          assume(result);
+          assume(result.fooId).equals(eight);
+
+          Foo.update({ entity: { fooId: eight, something: 'foo' }, ttl: 3 }, function (error) {
+            assume(error).is.falsey();
+
+            setTimeout(function () {
+              Foo.findOne({ fooId: eight }, function (er, res) {
+                assume(er).is.falsey();
+                assume(res).is.falsey();
+                done();
+              });
+            }, 3000);
+          });
+        });
       });
     });
 
