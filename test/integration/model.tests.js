@@ -752,7 +752,7 @@ describe('Model', function () {
     });
   });
 
-  describe.only('foo', function () {
+  describe('foo', function () {
     var one = uuid.v4();
     var two = uuid.v4();
     var three = uuid.v4();
@@ -807,7 +807,7 @@ describe('Model', function () {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: three }, function (error, res) {
-          assume(err).is.falsey();
+          assume(error).is.falsey();
           assume(res);
           assume(res.fooId).equals(three);
 
