@@ -63,7 +63,8 @@ module.exports = {
     dog_thing: cql.text()
   }).partitionKey('id'),
   foo: joi.object({
-    foo_id: cql.uuid()
+    foo_id: cql.uuid(),
+    something: cql.text()
   }).partitionKey('foo_id')
 };
 
