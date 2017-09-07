@@ -752,9 +752,13 @@ describe('Model', function () {
     });
   });
 
-  describe('foo', function () {
+  describe.only('foo', function () {
     var one = uuid.v4();
     var two = uuid.v4();
+    var three = uuid.v4();
+    var four = uuid.v4();
+    var five = uuid.v4();
+    var six = uuid.v4();
     var Foo;
 
     after(function (done) {
@@ -792,6 +796,53 @@ describe('Model', function () {
       Foo.create({ fooId: two }, function (err) {
         assume(err).is.falsey();
         next();
+      });
+    });
+
+    it('should create a record in the database that will properly expire with given ttl', function (done) {
+      Foo.create({ entity: { fooId: three }, ttl: 3 }, function (err) {
+        assume(err).is.falsey();
+
+        setTimeout(function () {
+          Foo.findOne({ fooId: three }, function (err, result) {
+            assume(err).is.falsey();
+            assume(result).is.falsey();
+            done();
+          });
+        }, 3000);
+
+      });
+    });
+
+    it('should create a record in the database that will expire but still be found before it reaches given ttl', function (done) {
+      Foo.create({ entity: { fooId: four }, ttl: 7 }, function (err) {
+        assume(err).is.falsey();
+
+        Foo.findOne({ fooId: four }, function (err, result) {
+          assume(err).is.falsey();
+          assume(result);
+          assume(result.fooId).equals(four);
+          setTimeout(function () {
+            Foo.findOne({ fooId: four }, function (err, result) {
+              assume(err).is.falsey();
+              assume(result).is.falsey();
+              done();
+            });
+          }, 7000);
+        });
+      });
+    });
+
+    it('should update a record in the database that will expire with given ttl', function (done) {
+      Foo.update({ entity: { fooId: five , something: 'foo' }, ttl: 2 }, function (err) {
+        assume(err).is.falsey();
+        setTimeout(function () {
+          Foo.findOne({ fooId: five }, function (err, res) {
+            assume(err).is.falsey();
+            assume(res).is.falsey();
+            done();
+          });
+        }, 5000);
       });
     });
 
