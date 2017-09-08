@@ -167,7 +167,7 @@ describe('StatementBuilder', function () {
       });
     });
 
-    it('should retun an error when trying to delete with no conditions when there is a lookup table', function () {
+    it('should return an error when trying to delete with no conditions when there is a lookup table', function () {
       var statement = b.remove({}, {});
       assume(statement).is.instanceof(Error);
     });
@@ -485,7 +485,14 @@ describe('StatementBuilder', function () {
 
     });
 
-    it('should properly generate multiple statements when updateing a set with add and remove', function () {
+    it('should return a proper statement with USING TTL if ttl options are passed', function () {
+      var statement = builder.update({ ttl: 8643462 }, entity);
+
+      assume(statement.statements.length).to.equal(1);
+      assume(statement.statements[0].cql).contains('USING TTL 8643462');
+    });
+
+    it('should properly generate multiple statements when updating a set with add and remove', function () {
       var next = clone(entity);
       next.relatedArtists = {
         add: next.relatedArtists.slice(0, 2),
@@ -510,6 +517,11 @@ describe('StatementBuilder', function () {
       assume(statement.table).eqls('artist');
       assume(statement.cql).is.a('string');
       assume(statement.params).is.an('array');
+    });
+
+    it('should append USING TTL to the statement if it is passed as an option', function () {
+      var statement = builder.create({ ttl: 864342 }, entity);
+      assume(statement.cql).contains('USING TTL 864342');
     });
 
     it('should return an error when given an improper entity', function () {
