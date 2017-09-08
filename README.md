@@ -202,7 +202,7 @@ Album.create({
 });
 ```
 
-We also support setting an optional expiration period called `TTL`(Time To Leave) for data expiration and removal. You can set up the `TTL` option either when creating the data entry or updating it, e.g. `{ ttl: 3 }` means the expiration time for the data is 3 seconds. Once when you update the data entry, it will reset its `TTL`. 
+We also support setting an optional expiration period called `TTL`(Time To Live) for data expiration and removal. You can set up the `TTL` option either when creating the data entry or updating it, e.g. `{ ttl: 3 }` means the expiration time for the data is 3 seconds. Once when you update the data entry, it will reset its `TTL`. 
 ```js
 Album.create({
   entity: {
@@ -214,9 +214,9 @@ Album.create({
   if (err) /* handle me */ return;
   /* create is completed */
 });
-
+```
 OR
-
+```js
 Album.update({
   entity: {
     albumId: uuid.v4(),
@@ -227,10 +227,11 @@ Album.update({
   if (err) /* handle me */ return;
   /* update is completed */
 });
-
 ```
 
-> Note: `ttl` option can NOT be passed down from the previous existing data entry when calling `update`. So please always keep in mind to pass in the secondary ttl when updating the data entry, or it will default to NOT expired.
+> Note: The `ttl` option must be set on every `update` call. 
+> It is not maintained from the initial entity creation. 
+> If you don't set it in an `update` call, the entity will not have a TTL set.
 
 ### Schema Validation
 
