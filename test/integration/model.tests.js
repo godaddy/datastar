@@ -847,19 +847,13 @@ describe('Model', function () {
       Foo.update({ entity: { fooId: five, something: 'foo' }, ttl: 2 }, function (err) {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: five }, function (error, result) {
-          assume(error).is.falsey();
-          assume(result);
-          assume(result.fooId).equals(five);
-
-          setTimeout(function () {
-            Foo.findOne({ fooId: five }, function (er, res) {
-              assume(er).is.falsey();
-              assume(res).is.falsey();
-              done();
-            });
-          }, 5000);
-        });
+        setTimeout(function () {
+          Foo.findOne({ fooId: five }, function (er, res) {
+            assume(er).is.falsey();
+            assume(res).is.falsey();
+            done();
+          });
+        }, 2000);
       });
     });
 

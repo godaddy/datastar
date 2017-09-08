@@ -202,7 +202,7 @@ Album.create({
 });
 ```
 
-We also support setting an optional expiration period called `TTL`(Time To Leave) for data expiration and removal. You can set up the `TTL` option either when creating the data entry or updating it. Once when you update the data entry, it will reset its `TTL`. 
+We also support setting an optional expiration period called `TTL`(Time To Leave) for data expiration and removal. You can set up the `TTL` option either when creating the data entry or updating it, e.g. `{ ttl: 3000 }` means the expiration time for the data is 3 seconds. Once when you update the data entry, it will reset its `TTL`. 
 ```js
 Album.create({
   entity: {
