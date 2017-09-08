@@ -229,9 +229,9 @@ Album.update({
 });
 ```
 
-> Note: The `ttl` option must be set on every `update` call. It is not
-> maintained from the initial entity creation. If you don't set it in an
-> `update` call, the entity will not have a TTL set.
+> Note: The `ttl` option must be set on every `update` call. 
+> It is not maintained from the initial entity creation. 
+> If you don't set it in an `update` call, the entity will not have a TTL set.
 
 ### Schema Validation
 
