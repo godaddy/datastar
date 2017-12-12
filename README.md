@@ -284,8 +284,8 @@ var Artist = datastar.define('artist', {
     related_artists: cql.set(cql.uuid()).allow(null),
     traits: cql.set(cql.text()),
     metadata: cql.map(cql.text(), cql.text()).allow(null)
-  }).partitionKey('artist_id'),
-    .lookupKeys('name')
+  }).partitionKey('artist_id')
+    .lookupKeys('name'),
   with: {
     compaction: {
       class: 'LeveledCompactionStrategy'
