@@ -30,6 +30,12 @@ describe('StatementBuilder', function () {
       assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist');
     });
 
+    it('should return an find ALL statement with allow-filtering included', function () {
+      var statement = builder.find({ type: 'find', allowFiltering: true }, {});
+
+      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist ALLOW FILTERING');
+    });
+
     it('should return an find statement with a field list if fields in options', function () {
       var statement = builder.find({
         type: 'find',
