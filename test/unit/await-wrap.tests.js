@@ -17,7 +17,7 @@ describe('datastar-await-wrap', function () {
         name: cql.text()
       }).partitionKey('name')
     });
-    wrapped = new Wrap(Model);
+    wrapped = new AwaitWrap(Model);
   });
 
   it('should correctly wrap the create function', async () => {
