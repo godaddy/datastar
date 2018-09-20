@@ -1022,7 +1022,7 @@ const datastar = new Datastar(config);
 const cql = datastar.schema.cql;
 
 // Wrap the model to expose async/await functions via `thenables`
-const Model = new Wrap(datastar.define('model', {
+const Model = new AwaitWrap(datastar.define('model', {
   schema: datastar.schema.object({
     name: cql.text()
   }).partitionKey('name')

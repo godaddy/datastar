@@ -1,13 +1,13 @@
-'use strict';
+
 
 var assume            = require('assume'),
-    uuid              = require('uuid'),
-    datastarTestTools = require('datastar-test-tools'),
-    schemas           = require('../fixtures/schemas'),
-    sinon             = require('sinon');
+  uuid              = require('uuid'),
+  datastarTestTools = require('datastar-test-tools'),
+  schemas           = require('../fixtures/schemas'),
+  sinon             = require('sinon');
 
 var helpers = datastarTestTools.helpers,
-    mocks   = datastarTestTools.mocks;
+  mocks   = datastarTestTools.mocks;
 
 assume.use(require('assume-sinon'));
 
@@ -159,8 +159,8 @@ describe('Model (unit)', function () {
 
     stream.on('readable', function () {
       var data;
-      /*eslint no-cond-assign: 0*/
-      /*eslint no-invalid-this: 0*/
+      /* eslint no-cond-assign: 0*/
+      /* eslint no-invalid-this: 0*/
 
       while ((data = this.read()) !== null) {
         assume(data).is.an('object');

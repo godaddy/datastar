@@ -1,14 +1,14 @@
-'use strict';
+
 
 var assume            = require('assume'),
-    datastarTestTools = require('datastar-test-tools'),
-    joi               = require('joi-of-cql'),
-    schemas           = require('../fixtures/schemas'),
-    Schema            = require('../../lib/schema');
+  datastarTestTools = require('datastar-test-tools'),
+  joi               = require('joi-of-cql'),
+  schemas           = require('../fixtures/schemas'),
+  Schema            = require('../../lib/schema');
 
 var helpers = datastarTestTools.helpers,
-    debug   = helpers.debug,
-    cql     = joi.cql;
+  debug   = helpers.debug,
+  cql     = joi.cql;
 
 describe('Schema (unit)', function () {
   var schema;
@@ -28,6 +28,7 @@ describe('Schema (unit)', function () {
     });
 
     function init() {
+      // eslint-disable-next-line
       Schema('invalid', invalid);
     }
 
@@ -36,6 +37,7 @@ describe('Schema (unit)', function () {
 
   it('should throw an error when given an invalid name for the schema', function () {
     function init() {
+      // eslint-disable-next-line
       Schema('has-dashes');
     }
 

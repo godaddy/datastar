@@ -1,8 +1,8 @@
-'use strict';
+
 
 var assume            = require('assume'),
-    Datastar          = require('../../lib'),
-    datastarTestTools = require('datastar-test-tools');
+  Datastar          = require('../../lib'),
+  datastarTestTools = require('datastar-test-tools');
 
 var helpers = datastarTestTools.helpers;
 

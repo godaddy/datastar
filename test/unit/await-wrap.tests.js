@@ -7,7 +7,7 @@ const { mocks, helpers } = require('datastar-test-tools');
 describe('datastar-await-wrap', function () {
   let Model;
   let wrapped;
-  let data = { name: 'what' };
+  const data = { name: 'what' };
 
   before(function () {
     const datastar = helpers.connectDatastar({ mock: true }, mocks.datastar());

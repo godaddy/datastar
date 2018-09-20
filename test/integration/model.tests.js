@@ -1,18 +1,18 @@
-'use strict';
 
-/*jshint camelcase: false */
+
+/* jshint camelcase: false */
 
 var assume            = require('assume'),
-    uuid              = require('uuid'),
-    async             = require('async'),
-    clone             = require('clone'),
-    schemas           = require('../fixtures/schemas'),
-    Datastar          = require('../..'),
-    datastarTestTools = require('datastar-test-tools');
+  uuid              = require('uuid'),
+  async             = require('async'),
+  clone             = require('clone'),
+  schemas           = require('../fixtures/schemas'),
+  Datastar          = require('../..'),
+  datastarTestTools = require('datastar-test-tools');
 
 var helpers = datastarTestTools.helpers;
 
-/*eslint no-invalid-this: 1*/
+/* eslint no-invalid-this: 1*/
 describe('Model', function () {
   this.timeout(60000);
   var datastar, Artist;
@@ -89,7 +89,7 @@ describe('Model', function () {
       //
       // First run a create, then do an update
       //
-      /*eslint max-nested-callbacks: 1*/
+      /* eslint max-nested-callbacks: 1*/
       Artist.create(entity, function (err) {
         assume(err).is.falsey();
 
@@ -294,7 +294,7 @@ describe('Model', function () {
       Person.update({
         id: entity.id,
         characteristics: {
-          index: { '1': 'ego-driven' }
+          index: { 1: 'ego-driven' }
         }
       }, function (err) {
         assume(err).is.falsey();
@@ -562,9 +562,9 @@ describe('Model', function () {
         ids = {};
       }
       async.parallel({
-        otherId: Song.findOne.bind(Song, { conditions: { otherId: ids.otherId || otherId } }),
-        uniqueId: Song.findOne.bind(Song, { conditions: { uniqueId: ids.uniqueId || uniqueId } }),
-        id: Song.findOne.bind(Song, { conditions: { id: ids.id || id } })
+        otherId: Song.findOne.bind(Song, { conditions: { otherId: ids.otherId || otherId }}),
+        uniqueId: Song.findOne.bind(Song, { conditions: { uniqueId: ids.uniqueId || uniqueId }}),
+        id: Song.findOne.bind(Song, { conditions: { id: ids.id || id }})
       }, callback);
     }
 
@@ -774,7 +774,7 @@ describe('Model', function () {
         schema: schemas.foo,
         with: {
           compaction: {
-            'class': 'LeveledCompactionStrategy'
+            class: 'LeveledCompactionStrategy'
           }
         }
       });
