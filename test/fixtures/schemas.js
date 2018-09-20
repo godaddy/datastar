@@ -1,4 +1,4 @@
-'use strict';
+
 
 var joi = require('joi-of-cql');
 

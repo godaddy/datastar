@@ -1,7 +1,7 @@
-'use strict';
+
 
 var assume            = require('assume'),
-    datastarTestTools = require('datastar-test-tools');
+  datastarTestTools = require('datastar-test-tools');
 
 var mocks = datastarTestTools.mocks;
 

@@ -1,4 +1,4 @@
-'use strict';
+
 
 var assume = require('assume');
 var With = require('../../lib/statement-builder/partial-statements/with');

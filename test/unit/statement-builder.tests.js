@@ -1,15 +1,15 @@
-'use strict';
+
 
 var fs               = require('fs'),
-    path             = require('path'),
-    clone            = require('clone'),
-    uuid             = require('uuid'),
-    assert           = require('assert'),
-    assume           = require('assume'),
-    schemas          = require('../fixtures/schemas'),
-    StatementBuilder = require('../../lib/statement-builder'),
-    statements       = require('../../lib/statement-builder/statements'),
-    Schema           = require('../../lib/schema');
+  path             = require('path'),
+  clone            = require('clone'),
+  uuid             = require('uuid'),
+  assert           = require('assert'),
+  assume           = require('assume'),
+  schemas          = require('../fixtures/schemas'),
+  StatementBuilder = require('../../lib/statement-builder'),
+  statements       = require('../../lib/statement-builder/statements'),
+  Schema           = require('../../lib/schema');
 
 var fixturesDir = path.join(__dirname, '..', 'fixtures');
 
@@ -84,18 +84,18 @@ describe('StatementBuilder', function () {
 
     it('should return a valid statement that uses the proper lookup table for find when querying by domainName', function () {
       var statement = b.find({
-          type: 'single',
-          conditions: {
-            name: 'whatever'
-          }
-        });
+        type: 'single',
+        conditions: {
+          name: 'whatever'
+        }
+      });
       //
       // Ensure we are querying the correct lookup table
       //
       assume(statement.cql.indexOf('artist_by_name'));
       assume(statement.params[0].value).to.equal('whatever');
     }
-  );
+    );
 
     var entity = clone(artistEntity);
     it('should return multiple statements to create for each lookup table', function () {
@@ -219,6 +219,7 @@ describe('StatementBuilder', function () {
     });
 
     function compileTable(options, entity) {
+      /* eslint-disable-next-line */
       var statement = new statements.table(schema);
       var opts = statement.init(options, entity);
       var tableName;

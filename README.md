@@ -36,6 +36,7 @@ This module is open source! That means **we want your contributions!**
   - [Drop Tables](#drop-tables)
   - [Statement Building](#statement-building)
   - [Conventions: casing, pluarlization, etc.](#conventions)
+  - [Using Async/Await](#using-asyncawait)
 - [Tests](#tests)
 - [Contributors](#contributors)
 
@@ -202,7 +203,7 @@ Album.create({
 });
 ```
 
-We also support setting an optional expiration period called `TTL`(Time To Live) for data expiration and removal. You can set up the `TTL` option either when creating the data entry or updating it, e.g. `{ ttl: 3 }` means the expiration time for the data is 3 seconds. Once when you update the data entry, it will reset its `TTL`. 
+We also support setting an optional expiration period called `TTL`(Time To Live) for data expiration and removal. You can set up the `TTL` option either when creating the data entry or updating it, e.g. `{ ttl: 3 }` means the expiration time for the data is 3 seconds. Once when you update the data entry, it will reset its `TTL`.
 ```js
 Album.create({
   entity: {
@@ -229,8 +230,8 @@ Album.update({
 });
 ```
 
-> Note: The `ttl` option must be set on every `update` call. 
-> It is not maintained from the initial entity creation. 
+> Note: The `ttl` option must be set on every `update` call.
+> It is not maintained from the initial entity creation.
 > If you don't set it in an `update` call, the entity will not have a TTL set.
 
 ### Schema Validation
@@ -1004,6 +1005,46 @@ We make a few assumptions which have manifested as conventions in this library.
    `camelCase` as the casing convention when interacting with datastar and the
    models created with it. The schema is the only place where the keys used MUST
    be written as `snake_case`.
+
+### Using Async/Await
+
+In Datastar we currently have experimental async/await support. The way to
+enable Async/Await is to explicitly wrap your models with the `AwaitWrap` class.
+This will expose all the expected methods for your model via a `thenable` that
+can be `await`ed. Example shown below.
+
+```js
+const Datastar = require('datastar');
+const { AwaitWrap } = require('datastar');
+const config = require('./config.json');
+
+const datastar = new Datastar(config);
+const cql = datastar.schema.cql;
+
+// Wrap the model to expose async/await functions via `thenables`
+const Model = new AwaitWrap(datastar.define('model', {
+  schema: datastar.schema.object({
+    name: cql.text()
+  }).partitionKey('name')
+}));
+
+async function main()
+  // Ensure the table exists
+  await Model.ensure()
+  // Create the model
+  await Model.create({ name: 'hello' });
+  // find models
+  const models = await Model.findAll({ name: 'hello' })
+  // if you need a stream you can still do that as well
+  const stream = Model.findAllStream({ name: 'hello' });
+}
+
+main();
+```
+
+Until we finalize integrating async/await support into datastar as a first class
+citizen, this is what we have available to start converting your callback code
+to use async/await.
 
 ## Tests
 
