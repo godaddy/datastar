@@ -63,6 +63,20 @@ describe('StatementBuilder', function () {
 
       assume(statement).is.an.Error;
     });
+
+    it('should return a find statement with query params', function () {
+      var statement = builder.find({
+        type: 'find',
+        conditions: {
+          artistId: { lte: '2345', gt: '1234' }
+        }
+      });
+
+      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist WHERE artist_id <= ? AND artist_id > ?');
+      assume(statement.params.length).to.equal(2);
+      assume(statement.params[0].value).to.equal('2345');
+      assume(statement.params[1].value).to.equal('1234');
+    });
   });
 
   describe('Lookup Tables', function () {
