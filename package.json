@@ -11,7 +11,7 @@
     "lodash.pick": "^4.0.1",
     "object-assign": "^4.0.1",
     "one-time": "0.0.4",
-    "priam": "^2.1.0",
+    "priam": "^2.1.1",
     "read-only-stream": "^2.0.0",
     "through2": "^2.0.0",
     "tinythen": "^1.0.1",
