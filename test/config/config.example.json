@@ -3,6 +3,7 @@
     "user": "cassandra",
     "password": "cassandra",
     "keyspace": "datastar",
-    "hosts": ["127.0.0.1"]
+    "hosts": ["127.0.0.1"],
+    "localDataCenter": "datacenter1"
   }
 }
