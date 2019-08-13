@@ -24,7 +24,6 @@
     "assume": "^2.1.0",
     "assume-sinon": "^1.0.0",
     "cassandra-driver": "^4.1.0",
-    "datastar-test-tools": "~1.0.0",
     "eslint": "^4.19.1",
     "eslint-config-godaddy": "^2.1.0",
     "eslint-plugin-json": "^1.2.1",

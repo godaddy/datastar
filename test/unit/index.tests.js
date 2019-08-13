@@ -1,20 +1,17 @@
 
+const assume = require('assume'),
+  mocks      = require('../mocks');
 
-var assume            = require('assume'),
-  datastarTestTools = require('datastar-test-tools');
+describe('Datastar (unit)', () => {
+  let Datastar;
 
-var mocks = datastarTestTools.mocks;
-
-describe('Datastar (unit)', function () {
-  var Datastar;
-
-  beforeEach(function () {
+  beforeEach(() => {
     Datastar = mocks.datastar();
   });
 
-  it('should create datastar instance', function () {
-    var datastar = new Datastar();
-    datastar.connect(function (err) {
+  it('should create datastar instance', () => {
+    const datastar = new Datastar();
+    datastar.connect(err => {
       assume(err).is.an('undefined');
     });
   });

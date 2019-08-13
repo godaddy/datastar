@@ -1,19 +1,17 @@
 
+const assume = require('assume'),
+  joi        = require('joi-of-cql'),
+  schemas    = require('../fixtures/schemas'),
+  Schema     = require('../../lib/schema'),
+  helpers    = require('../helpers');
 
-var assume            = require('assume'),
-  datastarTestTools = require('datastar-test-tools'),
-  joi               = require('joi-of-cql'),
-  schemas           = require('../fixtures/schemas'),
-  Schema            = require('../../lib/schema');
+const debug = helpers.debug,
+  cql       = joi.cql;
 
-var helpers = datastarTestTools.helpers,
-  debug   = helpers.debug,
-  cql     = joi.cql;
+describe('Schema (unit)', () => {
+  let schema;
 
-describe('Schema (unit)', function () {
-  var schema;
-
-  it('should create a schema', function () {
+  it('should create a schema', () => {
     schema = new Schema('artist', schemas.artist);
     debug(schema);
 
@@ -22,8 +20,8 @@ describe('Schema (unit)', function () {
     assume(schema.primaryKeys()).to.deep.equal(['artist_id']);
   });
 
-  it('should throw an error when given an invalid schema', function () {
-    var invalid = joi.object({
+  it('should throw an error when given an invalid schema', () => {
+    const invalid = joi.object({
       id: cql.uuid()
     });
 
@@ -35,7 +33,7 @@ describe('Schema (unit)', function () {
     assume(init).throws(/must define a partitionKey/);
   });
 
-  it('should throw an error when given an invalid name for the schema', function () {
+  it('should throw an error when given an invalid name for the schema', () => {
     function init() {
       // eslint-disable-next-line
       Schema('has-dashes');
@@ -44,48 +42,48 @@ describe('Schema (unit)', function () {
     assume(init).throws('Invalid character in schema name');
   });
 
-  it('should transform the schema (snakecase and aliases)', function () {
-    var entity = [
+  it('should transform the schema (snakecase and aliases)', () => {
+    const entity = [
       'createDate'
     ];
-    var fields = schema.fixKeys(entity);
+    const fields = schema.fixKeys(entity);
     assume(fields).to.deep.equal(['create_date']);
     debug(fields);
   });
 
-  it('should validate the schema', function () {
-    var entity = {
+  it('should validate the schema', () => {
+    const entity = {
       name: 'foo',
       createDate: new Date(),
       helloThere: 'new things'
     };
     debug(schema.validator);
-    var valid = schema.validate(schema.fixKeys(entity));
+    const valid = schema.validate(schema.fixKeys(entity));
     assume(valid.details).is.truthy();
     debug(valid);
   });
 
-  it('should allow for null values', function () {
-    var entity = {
+  it('should allow for null values', () => {
+    const entity = {
       name: 'whocares',
       createDate: new Date(),
       relatedArtists: null
     };
     debug(schema.validator);
-    var valid = schema.validate(schema.fixKeys(entity));
+    const valid = schema.validate(schema.fixKeys(entity));
     assume(valid).eql(schema.fixKeys(entity));
     debug(valid);
   });
 
   it('#fieldString() should return a list of all fields suitable for CQL ' +
-     'consumption if no arguments are given', function () {
+     'consumption if no arguments are given', () => {
     schema = new Schema('artist', schemas.artist);
     assume(schema.fieldString()).eql(
       '"artist_id", "name", "create_date", "update_date", "members", "related_artists", "traits", "metadata"');
   });
 
   it('#fieldString() should return a list of fields suitable for CQL ' +
-     'consumption when a list of fields is given', function () {
+     'consumption when a list of fields is given', () => {
     schema = new Schema('artist', schemas.artist);
     assume(schema.fieldString(['artist_id', 'name'])).eql('"artist_id", "name"');
   });
