@@ -1,6 +1,6 @@
 {
   "name": "datastar",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "Now witness the power of this FULLY ARMED AND OPERATIONAL DATASTAR!",
   "main": "lib",
   "dependencies": {
