@@ -1,15 +1,15 @@
 const assume = require('assume');
 const { AwaitWrap } = require('../..');
 const Stream  = require('stream');
+const mocks = require('../mocks');
+const helpers = require('../helpers');
 
-const { mocks, helpers } = require('datastar-test-tools');
-
-describe('datastar-await-wrap', function () {
+describe('datastar-await-wrap', () => {
   let Model;
   let wrapped;
   const data = { name: 'what' };
 
-  before(function () {
+  before(() => {
     const datastar = helpers.connectDatastar({ mock: true }, mocks.datastar());
     const cql = datastar.schema.cql;
     Model = datastar.define('model', {

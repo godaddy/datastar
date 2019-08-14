@@ -1,24 +1,20 @@
-
-
 /* jshint camelcase: false */
 
-var assume            = require('assume'),
-  uuid              = require('uuid'),
-  async             = require('async'),
-  clone             = require('clone'),
-  schemas           = require('../fixtures/schemas'),
-  Datastar          = require('../..'),
-  datastarTestTools = require('datastar-test-tools');
-
-var helpers = datastarTestTools.helpers;
+const assume = require('assume'),
+  uuid       = require('uuid'),
+  async      = require('async'),
+  clone      = require('clone'),
+  schemas    = require('../fixtures/schemas'),
+  Datastar   = require('../..'),
+  helpers    = require('../helpers');
 
 /* eslint no-invalid-this: 1*/
 describe('Model', function () {
   this.timeout(60000);
-  var datastar, Artist;
+  let datastar, Artist;
 
-  before(function (done) {
-    helpers.load(function (err, data) {
+  before(done => {
+    helpers.load((err, data) => {
       assume(err).to.equal(null);
       datastar = helpers.connectDatastar({ config: data.cassandra }, Datastar, done);
       /* cassandra = new driver.Client({
@@ -28,18 +24,18 @@ describe('Model', function () {
     });
   });
 
-  describe('Artist', function () {
-    after(function (done) {
+  describe('Artist', () => {
+    after(done => {
       if (Artist) return Artist.dropTables(done);
       done();
     });
 
-    it('should create a model', function () {
+    it('should create a model', () => {
       Artist = datastar.define('artist', {
         schema: schemas.artist
       });
 
-      Artist.before('create:build', function (options, next) {
+      Artist.before('create:build', (options, next) => {
         assume(options.statements).to.be.instanceof(datastar.StatementCollection);
         next();
       });
@@ -48,13 +44,13 @@ describe('Model', function () {
       assume(Artist.connection).to.not.be.an('undefined');
     });
 
-    it('should create tables', function (done) {
+    it('should create tables', done => {
       Artist.ensureTables(done);
     });
 
-    it('should create', function (done) {
+    it('should create', done => {
       // INSERT INTO [schema.name] ([allFields[0], allFields[1]]) VALUES (?, ?, ...)
-      var options = {
+      const options = {
         entity: {
           artistId: '00000000-0000-0000-0000-000000000002',
           name: 'hello there'
@@ -64,8 +60,8 @@ describe('Model', function () {
       Artist.create(options, done);
     });
 
-    it('should update', function (done) {
-      var entity = {
+    it('should update', done => {
+      const entity = {
         id: '00000000-0000-0000-0000-000000000003',
         name: 'nirvana',
         createDate: new Date(),
@@ -74,7 +70,7 @@ describe('Model', function () {
         }
       };
 
-      var update = {
+      const update = {
         id: entity.id,
         members: ['Kurt Cobain'],
         metadata: {
@@ -90,13 +86,13 @@ describe('Model', function () {
       // First run a create, then do an update
       //
       /* eslint max-nested-callbacks: 1*/
-      Artist.create(entity, function (err) {
+      Artist.create(entity, err => {
         assume(err).is.falsey();
 
         //
         // Now run a find and confirm we are where we assume
         //
-        Artist.get(entity.id, function (_, result) {
+        Artist.get(entity.id, (_, result) => {
           assume(result.id).to.equal(entity.id);
           assume(result.name).to.equal(entity.name);
           assume(result.metadata).to.be.an('object');
@@ -105,9 +101,9 @@ describe('Model', function () {
           //
           // Now update to this same entity
           //
-          Artist.update(update, function (err) {
+          Artist.update(update, err => {
             assume(err).is.falsey();
-            find(Artist, entity.id, function (_, result) {
+            find(Artist, entity.id, (_, result) => {
               assume(result.members).to.deep.equal(update.members);
               assume(result.metadata.hello).to.equal(update.metadata.hello);
               assume(result.metadata.please).to.equal(update.metadata.please);
@@ -122,9 +118,9 @@ describe('Model', function () {
                 metadata: {
                   hello: null
                 }
-              }, function (err) {
+              }, err => {
                 assume(err).is.falsey();
-                find(Artist, entity.id, function (_, result) {
+                find(Artist, entity.id, (_, result) => {
                   assume(result.metadata.hello).is.falsey();
 
                   Artist.remove(entity, done);
@@ -136,21 +132,21 @@ describe('Model', function () {
       });
     });
 
-    it('should find', function (done) {
+    it('should find', done => {
       // SELECT [fields] FROM [table] WHERE [conditions.query[0]] AND [conditionals.query[1]] FROM [schema.name]
-      var options = {
+      const options = {
         type: 'all',
         conditions: {
           artistId: '00000000-0000-0000-0000-000000000002'
         }
       };
 
-      Artist.find(options, function (err, results) {
+      Artist.find(options, (err, results) => {
         assume(err).to.equal(null);
         assume(results).to.be.an('array');
         assume(results.length).equals(1);
 
-        var result = results[0];
+        const result = results[0];
         assume(result.id).to.be.a('string');
         assume(result.name).to.be.a('string');
         done();
@@ -162,27 +158,27 @@ describe('Model', function () {
     // properly. We may want to put delays in here depending on how cassandra
     // behaves
     //
-    it('should remove', function (done) {
-      var id = '00000000-0000-0000-0000-000000000001';
-      var entity = {
+    it('should remove', done => {
+      const id = '00000000-0000-0000-0000-000000000001';
+      const entity = {
         id: id,
         name: 'meatloaf'
       };
 
-      var findOptions = {
+      const findOptions = {
         type: 'all',
         conditions: {
           artistId: id
         }
       };
 
-      Artist.create(entity, function (err) {
+      Artist.create(entity, err => {
         if (err) {
           return done(err);
         }
         async.waterfall([
           Artist.find.bind(Artist, findOptions),
-          function (result, next) {
+          (result, next) => {
             var res = result[0];
             assume(result.length).to.equal(1);
             assume(res.id).to.be.a('string');
@@ -190,12 +186,12 @@ describe('Model', function () {
             next(null, res);
           },
           Artist.remove.bind(Artist),
-          function (_, next) {
-            setTimeout(function () {
+          (_, next) => {
+            setTimeout(() => {
               Artist.find(findOptions, next);
             }, 1000);
           }
-        ], function (err, last) {
+        ], (err, last) => {
           if (err) {
             return done(err);
           }
@@ -206,21 +202,21 @@ describe('Model', function () {
     });
   });
 
-  describe('update on List type', function () {
-    var Person;
+  describe('update on List type', () => {
+    let Person;
 
-    var entity = {
+    const entity = {
       id: 'a2fc6faa-ca90-4b00-bfc7-e3a3dcb05be3',
       name: 'Geoff',
       characteristics: ['egotistical', 'opinionated', 'proud']
     };
 
-    after(function (done) {
+    after(done => {
       if (Person) return Person.dropTables(done);
       done();
     });
 
-    it('create a person model', function (done) {
+    it('create a person model', done => {
       Person = datastar.define('person', {
         ensureTables: true,
         schema: schemas.person
@@ -230,22 +226,22 @@ describe('Model', function () {
       Person.on('error', done);
     });
 
-    it('should create a person model with a list', function (done) {
+    it('should create a person model with a list', done => {
       Person.create(entity, done);
     });
 
-    it('should handle an update operation that prepends a value on the list', function (done) {
+    it('should handle an update operation that prepends a value on the list', done => {
       Person.update({
         id: entity.id,
         characteristics: {
           prepend: ['nosey']
         }
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
-        setTimeout(function () {
+        setTimeout(() => {
           Person.findOne({
             conditions: { id: entity.id }
-          }, function (err, result) {
+          }, (err, result) => {
             assume(err).is.falsey();
             assume(result.characteristics[0]).to.equal('nosey');
             done();
@@ -254,17 +250,17 @@ describe('Model', function () {
       });
     });
 
-    it('should handle an update for an append operation', function (done) {
+    it('should handle an update for an append operation', done => {
       Person.update({
         id: entity.id,
         characteristics: {
           append: ['insecure']
         }
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         Person.findOne({
           conditions: { id: entity.id }
-        }, function (err, result) {
+        }, (err, result) => {
           assume(err).is.falsey();
           assume(result.characteristics[result.characteristics.length - 1]).to.equal('insecure');
           done();
@@ -272,17 +268,17 @@ describe('Model', function () {
       });
     });
 
-    it('should handle an update for a remove operation', function (done) {
+    it('should handle an update for a remove operation', done => {
       Person.update({
         id: entity.id,
         characteristics: {
           remove: ['egotistical']
         }
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         Person.findOne({
           conditions: { id: entity.id }
-        }, function (err, result) {
+        }, (err, result) => {
           assume(err).is.falsey();
           assume(result.characteristics.indexOf('egotistical')).to.equal(-1);
           done();
@@ -290,17 +286,17 @@ describe('Model', function () {
       });
     });
 
-    it('should handle an update for an index operation', function (done) {
+    it('should handle an update for an index operation', done => {
       Person.update({
         id: entity.id,
         characteristics: {
           index: { 1: 'ego-driven' }
         }
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         Person.findOne({
           conditions: { id: entity.id }
-        }, function (err, result) {
+        }, (err, result) => {
           assume(err).is.falsey();
           assume(result.characteristics[1]).to.equal('ego-driven');
           done();
@@ -308,16 +304,16 @@ describe('Model', function () {
       });
     });
 
-    it('should handle an update that replaces the list', function (done) {
-      var newChars = ['friendly', 'humble', 'present'];
+    it('should handle an update that replaces the list', done => {
+      const newChars = ['friendly', 'humble', 'present'];
       Person.update({
         id: entity.id,
         characteristics: newChars
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         Person.findOne({
           conditions: { id: entity.id }
-        }, function (err, result) {
+        }, (err, result) => {
           assume(err).is.falsey();
           assume(result.characteristics).to.deep.equal(newChars);
           done();
@@ -325,10 +321,10 @@ describe('Model', function () {
       });
     });
 
-    it('should fetch a person with the simpler find syntax (object)', function (done) {
+    it('should fetch a person with the simpler find syntax (object)', done => {
       Person.findOne({
         id: entity.id
-      }, function (err, res) {
+      }, (err, res) => {
         assume(err).is.falsey();
         assume(res).to.be.an('object');
         done();
@@ -336,32 +332,32 @@ describe('Model', function () {
 
     });
 
-    it('should fetch a person with the simpler find syntax (string)', function (done) {
-      Person.get(entity.id, function (err, res) {
+    it('should fetch a person with the simpler find syntax (string)', done => {
+      Person.get(entity.id, (err, res) => {
         assume(err).is.falsey();
         assume(res).to.be.an('object');
         done();
       });
     });
 
-    it('should completely remove the entity', function (done) {
+    it('should completely remove the entity', done => {
       Person.remove({
         id: entity.id
       }, done);
     });
   });
 
-  describe('Composite Partition Keys', function () {
-    var Cat;
-    var id = 'c000a7a7-372a-482c-96be-e06050933725';
-    var hash = 6;
+  describe('Composite Partition Keys', () => {
+    let Cat;
+    const id = 'c000a7a7-372a-482c-96be-e06050933725';
+    const hash = 6;
 
-    after(function (done) {
+    after(done => {
       if (Cat) return Cat.dropTables(done);
       done();
     });
 
-    it('should create the table when defining the model with composite partition key', function (done) {
+    it('should create the table when defining the model with composite partition key', done => {
       Cat = datastar.define('cat', {
         ensureTables: true,
         schema: schemas.cat
@@ -374,102 +370,102 @@ describe('Model', function () {
       assume(Cat.connection).to.not.be.an('undefined');
     });
 
-    it('should be able to create', function (done) {
+    it('should be able to create', done => {
       Cat.create({
         id: id,
         hash: hash,
         name: 'Hector'
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         done();
       });
     });
 
-    it('should be able to update that same record', function (done) {
+    it('should be able to update that same record', done => {
       Cat.update({
         id: id,
         hash: hash,
         createDate: new Date()
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         done();
       });
     });
 
-    it('should error with simpler find syntax with more complicated key (string)', function (done) {
-      Cat.get(id, function (err) {
+    it('should error with simpler find syntax with more complicated key (string)', done => {
+      Cat.get(id, err => {
         assume(err).to.be.instanceof(Error);
         done();
       });
     });
 
-    it('should be able to find the record', function (done) {
+    it('should be able to find the record', done => {
       Cat.findOne({
         conditions: {
           id: id,
           hash: hash
         }
-      }, function (err, res) {
+      }, (err, res) => {
         assume(err).is.falsey();
         assume(res).to.be.an('object');
         done();
       });
     });
 
-    it('should error when updating without the hash in the composite key', function (done) {
+    it('should error when updating without the hash in the composite key', done => {
       Cat.update({
         id: id,
         createDate: new Date()
-      }, function (err) {
+      }, err => {
         assume(err).to.be.instanceof(Error);
         done();
       });
     });
 
-    it('should error when we pass in a key that doesnt exist when running update', function (done) {
+    it('should error when we pass in a key that doesnt exist when running update', done => {
       Cat.update({
         id: id,
         hash: hash,
         whatAReYOuDOing: 'hello'
-      }, function (err) {
+      }, err => {
         assume(err).to.be.instanceof(Error);
         done();
       });
     });
 
-    it('should error when we pass in a key that doesnt exist when running create', function (done) {
+    it('should error when we pass in a key that doesnt exist when running create', done => {
       Cat.create({
         id: id,
         hash: hash,
         whatAReYOuDOing: 'hello'
-      }, function (err) {
+      }, err => {
         assume(err).to.be.instanceof(Error);
         done();
       });
     });
 
-    it('should remove the record', function (done) {
+    it('should remove the record', done => {
       Cat.remove({
         id: id,
         hash: hash
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         done();
       });
     });
   });
 
-  describe('Clustering Keys', function () {
-    var Album;
-    var id = '9adc5c0e-6de5-4cf2-9b96-143f82caba63';
-    var artistId = 'd416d385-c57d-4db9-9e37-ca04cb9fceb9';
+  describe('Clustering Keys', () => {
+    let Album;
+    const id = '9adc5c0e-6de5-4cf2-9b96-143f82caba63';
+    const artistId = 'd416d385-c57d-4db9-9e37-ca04cb9fceb9';
 
-    after(function (done) {
+    after(done => {
       if (Album) return Album.dropTables(done);
       done();
     });
 
-    it('should create a table with secondary/clustering keys', function (done) {
+    it('should create a table with secondary/clustering keys', done => {
       Album = datastar.define('album', {
         ensureTables: true,
         schema: schemas.album
@@ -481,47 +477,47 @@ describe('Model', function () {
       //
       // Work with the literal object on every findOne because Why not?
       //
-      Album.after('find:one', function (result, next) {
+      Album.after('find:one', (result, next) => {
         next(null, result.toJSON());
       });
       //
       // AND THEN LETS CHANGE IT BACK
       //
-      Album.after('find:one', function (result, next) {
+      Album.after('find:one', (result, next) => {
         next(null, new Album(result));
       });
     });
 
-    it('should create an album with proper IDs', function (done) {
+    it('should create an album with proper IDs', done => {
       Album.create({
         id: id,
         artistId: artistId,
         name: 'hello',
         releaseDate: new Date()
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         done();
       });
     });
 
-    it('should update an album', function (done) {
+    it('should update an album', done => {
       Album.update({
         id: id,
         artistId: artistId,
         trackList: ['whatever whatever whatever', 'you dont know whats coming']
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         done();
       });
     });
 
-    it('should find an album', function (done) {
+    it('should find an album', done => {
       Album.findOne({
         conditions: {
           id: id,
           artistId: artistId
         }
-      }, function (err, res) {
+      }, (err, res) => {
         assume(err).is.falsey();
         assume(res).to.be.an('object');
         assume(res).to.be.instanceof(Album);
@@ -529,32 +525,32 @@ describe('Model', function () {
       });
     });
 
-    it('should error when updating without the artistId', function (done) {
+    it('should error when updating without the artistId', done => {
       Album.update({
         id: id
-      }, function (err) {
+      }, err => {
         assume(err).to.be.instanceof(Error);
         done();
       });
     });
 
-    it('should remove an Album', function (done) {
+    it('should remove an Album', done => {
       Album.remove({
         id: id,
         artistId: artistId
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         done();
       });
     });
   });
 
-  describe('Lookup Tables', function () {
-    var Song;
-    var uniqueId = '9adc5c0e-6de5-4cf2-9b96-143f82caba63';
-    var otherId = 'd416d385-c57d-4db9-9e37-ca04cb9fceb9';
-    var id = 'a5fbcd74-12e1-4860-b625-db2c472ba1fa';
-    var newOtherId = 'b7c49590-6b37-45c6-9d9b-2a82759c52a8';
+  describe('Lookup Tables', () => {
+    let Song;
+    const uniqueId = '9adc5c0e-6de5-4cf2-9b96-143f82caba63';
+    const otherId = 'd416d385-c57d-4db9-9e37-ca04cb9fceb9';
+    const id = 'a5fbcd74-12e1-4860-b625-db2c472ba1fa';
+    let newOtherId = 'b7c49590-6b37-45c6-9d9b-2a82759c52a8';
 
     function findOneAll(ids, callback) {
       if (typeof ids === 'function') {
@@ -568,12 +564,12 @@ describe('Model', function () {
       }, callback);
     }
 
-    after(function (done) {
+    after(done => {
       if (Song) return Song.dropTables(done);
       done();
     });
 
-    it('should be created when defining a model with lookupKeys and ensureTables is true', function (done) {
+    it('should be created when defining a model with lookupKeys and ensureTables is true', done => {
       Song = datastar.define('song', {
         ensureTables: true,
         schema: schemas.song.lookupKeys(['otherId', 'uniqueId'])
@@ -586,7 +582,7 @@ describe('Model', function () {
       assume(Song.connection).to.not.be.an('undefined');
     });
 
-    it('should be able to write all lookup tables', function (done) {
+    it('should be able to write all lookup tables', done => {
       Song.create({
         id: id,
         otherId: otherId,
@@ -594,13 +590,13 @@ describe('Model', function () {
       }, done);
     });
 
-    var previous = {
+    const previous = {
       id: id,
       otherId: otherId,
       uniqueId: uniqueId
     };
 
-    var update = {
+    const update = {
       id: id,
       otherId: otherId,
       uniqueId: uniqueId,
@@ -608,15 +604,15 @@ describe('Model', function () {
       artists: [uuid.v4(), uuid.v4()]
     };
 
-    it('should be able to update all lookup tables when not changing the primary keys', function (done) {
+    it('should be able to update all lookup tables when not changing the primary keys', done => {
       Song.update({
         previous: previous,
         entity: update
       }, done);
     });
 
-    it('should be able to find by all the `primaryKeys` and return the same value', function (done) {
-      findOneAll(function (err, result) {
+    it('should be able to find by all the `primaryKeys` and return the same value', done => {
+      findOneAll((err, result) => {
         assume(err).is.falsey();
         assume(result.id).to.deep.equal(result.uniqueId);
         assume(result.uniqueId).to.deep.equal(result.otherId);
@@ -627,26 +623,26 @@ describe('Model', function () {
     //
     // Setup second update
     //
-    var up = clone(update);
-    var newArtist = uuid.v4();
+    const up = clone(update);
+    const newArtist = uuid.v4();
     up.artists.push(newArtist);
     up.otherId = newOtherId;
 
-    it('should be able to update to all lookup tables when changing a primaryKey for a lookup table and ensure the old primaryKey reference was deleted', function (done) {
+    it('should be able to update to all lookup tables when changing a primaryKey for a lookup table and ensure the old primaryKey reference was deleted', done => {
       Song.update({
         previous: [previous],
         entities: [up]
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
         //
         // slight delay
         //
-        setTimeout(function () {
+        setTimeout(() => {
           Song.findOne({
             conditions: {
               otherId: update.otherId
             }
-          }, function (err, res) {
+          }, (err, res) => {
             assume(err).is.falsey();
             assume(res).is.falsey();
             done();
@@ -655,14 +651,14 @@ describe('Model', function () {
       });
     });
 
-    it('should find all by all primaryKeys, specifically the new one and have equal values', function (done) {
+    it('should find all by all primaryKeys, specifically the new one and have equal values', done => {
       findOneAll({
         otherId: newOtherId
-      }, function (err, result) {
+      }, (err, result) => {
         assume(err).is.falsey();
-        var id = result.id.toJSON();
-        var uniqueId = result.uniqueId.toJSON();
-        var otherId = result.otherId.toJSON();
+        const id = result.id.toJSON();
+        const uniqueId = result.uniqueId.toJSON();
+        const otherId = result.otherId.toJSON();
         assume(id).to.deep.equal(uniqueId);
         assume(id).to.deep.equal(otherId);
         assume(uniqueId).to.deep.equal(otherId);
@@ -670,7 +666,7 @@ describe('Model', function () {
       });
     });
 
-    it('should properly update when not passing a previous value and doing a find operation to fetch previous state', function (done) {
+    it('should properly update when not passing a previous value and doing a find operation to fetch previous state', done => {
       Song.update({
         id: id,
         artists: {
@@ -679,14 +675,14 @@ describe('Model', function () {
       }, done);
     });
 
-    it('should fail to update when calling save on the model if no columns changed directly', function (done) {
-      Song.findOne({ id: id }, function (err, song) {
+    it('should fail to update when calling save on the model if no columns changed directly', done => {
+      Song.findOne({ id: id }, (err, song) => {
         assume(err).is.falsey();
 
         song.artists.push(uuid.v4());
 
-        song.save(function () {
-          Song.findOne({ id: id }, function (err, result) {
+        song.save(() => {
+          Song.findOne({ id: id }, (err, result) => {
             assume(err).is.falsey();
             assume(result.toJSON()).not.to.deep.equal(song.toJSON());
             done();
@@ -695,24 +691,24 @@ describe('Model', function () {
       });
     });
 
-    it('should update when calling save on the model and not call an extra findOne since we have the previous state', function (done) {
-      var old = Song.findOne;
-      var called = 0;
+    it('should update when calling save on the model and not call an extra findOne since we have the previous state', done => {
+      const old = Song.findOne;
+      let called = 0;
 
       Song.findOne = function () {
         called++;
         old.apply(Song, arguments);
       };
 
-      Song.findOne({ id: id }, function (err, song) {
+      Song.findOne({ id: id }, (err, song) => {
         assume(err).is.falsey();
 
         newOtherId = uuid.v4();
         song.otherId = newOtherId;
 
-        song.save(function (err) {
+        song.save(err => {
           assume(err).is.falsey();
-          Song.findOne({ id: id }, function (err, result) {
+          Song.findOne({ id: id }, (err, result) => {
             assume(err).is.falsey();
             assume(result.toJSON()).to.deep.equal(song.toJSON());
             assume(called).to.equal(2);
@@ -723,17 +719,17 @@ describe('Model', function () {
       });
     });
 
-    it('should remove from all lookup tables', function (done) {
+    it('should remove from all lookup tables', done => {
       Song.remove({
         id: id,
         otherId: newOtherId,
         uniqueId: uniqueId
-      }, function (err) {
+      }, err => {
         assume(err).is.falsey();
 
-        findOneAll({ otherId: newOtherId }, function (err, result) {
+        findOneAll({ otherId: newOtherId }, (err, result) => {
           assume(err).is.falsey();
-          Object.keys(result).forEach(function (key) {
+          Object.keys(result).forEach(key => {
             assume(result[key]).is.falsey();
           });
           done();
@@ -741,35 +737,35 @@ describe('Model', function () {
       });
     });
 
-    it('should error when trying to remove without required attributes', function (done) {
+    it('should error when trying to remove without required attributes', done => {
       Song.remove({
         id: id,
         otherId: otherId
-      }, function (err) {
+      }, err => {
         assume(err).to.be.instanceof(Error);
         done();
       });
     });
   });
 
-  describe('foo', function () {
-    var one = uuid.v4();
-    var two = uuid.v4();
-    var three = uuid.v4();
-    var four = uuid.v4();
-    var five = uuid.v4();
-    var six = uuid.v4();
-    var seven = uuid.v4();
-    var eight = uuid.v4();
+  describe('foo', () => {
+    const one = uuid.v4();
+    const two = uuid.v4();
+    const three = uuid.v4();
+    const four = uuid.v4();
+    const five = uuid.v4();
+    const six = uuid.v4();
+    const seven = uuid.v4();
+    const eight = uuid.v4();
 
-    var Foo;
+    let Foo;
 
-    after(function (done) {
+    after(done => {
       if (Foo) return Foo.dropTables(done);
       done();
     });
 
-    it('should create a table with an alter statement', function (done) {
+    it('should create a table with an alter statement', done => {
       Foo = datastar.define('foo', {
         schema: schemas.foo,
         with: {
@@ -779,7 +775,7 @@ describe('Model', function () {
         }
       });
 
-      Foo.ensureTables(function (err) {
+      Foo.ensureTables(err => {
         if (err) {
           console.error(err);
           return done(err);
@@ -788,31 +784,31 @@ describe('Model', function () {
       });
     });
 
-    it('should create multiple records in the database', function (done) {
-      var next = assume.wait(2, 2, done);
+    it('should create multiple records in the database', done => {
+      const next = assume.wait(2, 2, done);
 
-      Foo.create({ fooId: one }, function (err) {
+      Foo.create({ fooId: one }, err => {
         assume(err).is.falsey();
         next();
       });
 
-      Foo.create({ fooId: two }, function (err) {
+      Foo.create({ fooId: two }, err => {
         assume(err).is.falsey();
         next();
       });
     });
 
-    it('should create a record in the database that will properly expire with given ttl', function (done) {
-      Foo.create({ entity: { fooId: three }, ttl: 3 }, function (err) {
+    it('should create a record in the database that will properly expire with given ttl', done => {
+      Foo.create({ entity: { fooId: three }, ttl: 3 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: three }, function (error, res) {
+        Foo.findOne({ fooId: three }, (error, res) => {
           assume(error).is.falsey();
           assume(res);
           assume(res.fooId).equals(three);
 
-          setTimeout(function () {
-            Foo.findOne({ fooId: three }, function (er, result) {
+          setTimeout(() => {
+            Foo.findOne({ fooId: three }, (er, result) => {
               assume(er).is.falsey();
               assume(result).is.falsey();
               done();
@@ -822,17 +818,17 @@ describe('Model', function () {
       });
     });
 
-    it('should create a record in the database that will expire but still be found before it reaches given ttl', function (done) {
-      Foo.create({ entity: { fooId: four }, ttl: 7 }, function (err) {
+    it('should create a record in the database that will expire but still be found before it reaches given ttl', done => {
+      Foo.create({ entity: { fooId: four }, ttl: 7 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: four }, function (err, res) {
+        Foo.findOne({ fooId: four }, (err, res) => {
           assume(err).is.falsey();
           assume(res);
           assume(res.fooId).equals(four);
 
-          setTimeout(function () {
-            Foo.findOne({ fooId: four }, function (err, result) {
+          setTimeout(() => {
+            Foo.findOne({ fooId: four }, (err, result) => {
               assume(err).is.falsey();
               assume(result);
               assume(result.fooId).equals(four);
@@ -843,12 +839,12 @@ describe('Model', function () {
       });
     });
 
-    it('should update a record in the database that will expire with given ttl', function (done) {
-      Foo.update({ entity: { fooId: five, something: 'foo' }, ttl: 2 }, function (err) {
+    it('should update a record in the database that will expire with given ttl', done => {
+      Foo.update({ entity: { fooId: five, something: 'foo' }, ttl: 2 }, err => {
         assume(err).is.falsey();
 
-        setTimeout(function () {
-          Foo.findOne({ fooId: five }, function (er, res) {
+        setTimeout(() => {
+          Foo.findOne({ fooId: five }, (er, res) => {
             assume(er).is.falsey();
             assume(res).is.falsey();
             done();
@@ -857,17 +853,17 @@ describe('Model', function () {
       });
     });
 
-    it('should update a record in the database that can be found before it reaches ttl', function (done) {
-      Foo.update({ entity: { fooId: six, something: 'foo' }, ttl: 5 }, function (err) {
+    it('should update a record in the database that can be found before it reaches ttl', done => {
+      Foo.update({ entity: { fooId: six, something: 'foo' }, ttl: 5 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: six }, function (error, result) {
+        Foo.findOne({ fooId: six }, (error, result) => {
           assume(error).is.falsey();
           assume(result);
           assume(result.fooId).equals(six);
 
-          setTimeout(function () {
-            Foo.findOne({ fooId: six }, function (er, res) {
+          setTimeout(() => {
+            Foo.findOne({ fooId: six }, (er, res) => {
               assume(er).is.falsey();
               assume(res);
               assume(res.fooId).equals(six);
@@ -878,20 +874,20 @@ describe('Model', function () {
       });
     });
 
-    it('should update a record in the database with an updated reset ttl and can be found before it reaches the updated ttl', function (done) {
-      Foo.update({ entity: { fooId: seven, something: 'boo' }, ttl: 3 }, function (err) {
+    it('should update a record in the database with an updated reset ttl and can be found before it reaches the updated ttl', done => {
+      Foo.update({ entity: { fooId: seven, something: 'boo' }, ttl: 3 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: seven }, function (error, result) {
+        Foo.findOne({ fooId: seven }, (error, result) => {
           assume(error).is.falsey();
           assume(result);
           assume(result.fooId).equals(seven);
 
-          Foo.update({ entity: { fooId: seven, something: 'foo' }, ttl: 10 }, function (error) {
+          Foo.update({ entity: { fooId: seven, something: 'foo' }, ttl: 10 }, error => {
             assume(error).is.falsey();
 
-            setTimeout(function () {
-              Foo.findOne({ fooId: seven }, function (er, res) {
+            setTimeout(() => {
+              Foo.findOne({ fooId: seven }, (er, res) => {
                 assume(er).is.falsey();
                 assume(res);
                 assume(res.fooId).equals(seven);
@@ -903,20 +899,20 @@ describe('Model', function () {
       });
     });
 
-    it('should update a record in the database with an updated reset ttl and expire after it reaches the updated ttl', function (done) {
-      Foo.update({ entity: { fooId: eight, something: 'boo' }, ttl: 2 }, function (err) {
+    it('should update a record in the database with an updated reset ttl and expire after it reaches the updated ttl', done => {
+      Foo.update({ entity: { fooId: eight, something: 'boo' }, ttl: 2 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: eight }, function (error, result) {
+        Foo.findOne({ fooId: eight }, (error, result) => {
           assume(error).is.falsey();
           assume(result);
           assume(result.fooId).equals(eight);
 
-          Foo.update({ entity: { fooId: eight, something: 'foo' }, ttl: 3 }, function (error) {
+          Foo.update({ entity: { fooId: eight, something: 'foo' }, ttl: 3 }, error => {
             assume(error).is.falsey();
 
-            setTimeout(function () {
-              Foo.findOne({ fooId: eight }, function (er, res) {
+            setTimeout(() => {
+              Foo.findOne({ fooId: eight }, (er, res) => {
                 assume(er).is.falsey();
                 assume(res).is.falsey();
                 done();
@@ -927,22 +923,22 @@ describe('Model', function () {
       });
     });
 
-    it('should run a find query with a limit of 1 and return 1 record', function (done) {
-      Foo.findAll({ conditions: {}, limit: 1 }, function (err, recs) {
+    it('should run a find query with a limit of 1 and return 1 record', done => {
+      Foo.findAll({ conditions: {}, limit: 1 }, (err, recs) => {
         assume(err).is.falsey();
         assume(recs.length).equals(1);
         done();
       });
     });
 
-    it('should remove entities', function (done) {
-      var next = assume.wait(2, 2, done);
-      Foo.remove({ fooId: one }, function (err) {
+    it('should remove entities', done => {
+      const next = assume.wait(2, 2, done);
+      Foo.remove({ fooId: one }, err => {
         assume(err).is.falsey();
         next();
       });
 
-      Foo.remove({ fooId: two }, function (err) {
+      Foo.remove({ fooId: two }, err => {
         assume(err).is.falsey();
         next();
       });
@@ -954,15 +950,13 @@ describe('Model', function () {
       conditions: {
         id: id
       }
-    }, function (err, res) {
+    }, (err, res) => {
       assume(err).is.falsey();
       callback(null, res);
     });
   }
 
-  after(function (done) {
+  after(done => {
     datastar.close(done);
   });
 });
-
-

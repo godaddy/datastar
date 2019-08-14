@@ -11,7 +11,7 @@
     "lodash.pick": "^4.0.1",
     "object-assign": "^4.0.1",
     "one-time": "0.0.4",
-    "priam": "^2.1.0",
+    "priam": "^3.0.0",
     "read-only-stream": "^2.0.0",
     "through2": "^2.0.0",
     "tinythen": "^1.0.1",
@@ -23,8 +23,7 @@
   "devDependencies": {
     "assume": "^2.1.0",
     "assume-sinon": "^1.0.0",
-    "cassandra-driver": "^3.5.0",
-    "datastar-test-tools": "~1.0.0",
+    "cassandra-driver": "^4.1.0",
     "eslint": "^4.19.1",
     "eslint-config-godaddy": "^2.1.0",
     "eslint-plugin-json": "^1.2.1",
@@ -33,7 +32,7 @@
     "istanbul": "^0.4.1",
     "mocha": "^5.2.0",
     "mocha-istanbul": "^0.2.0",
-    "nyc": "^13.0.1",
+    "nyc": "^14.1.1",
     "proxyquire": "^1.7.3",
     "sinon": "^1.17.2"
   },
