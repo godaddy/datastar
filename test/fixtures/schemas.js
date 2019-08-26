@@ -64,7 +64,11 @@ module.exports = {
   }).partitionKey('id'),
   foo: joi.object({
     foo_id: cql.uuid(),
+    secondary_id: cql.uuid(),
+    non_nullable_id: cql.uuid().meta({ nullConversion: false }),
+    nullable_id: cql.uuid(),
     something: cql.text()
   }).partitionKey('foo_id')
+    .clusteringKey('secondary_id')
 };
 

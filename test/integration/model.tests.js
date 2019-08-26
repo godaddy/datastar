@@ -749,6 +749,7 @@ describe('Model', function () {
   });
 
   describe('foo', () => {
+    const zeros = '00000000-0000-0000-0000-000000000000';
     const one = uuid.v4();
     const two = uuid.v4();
     const three = uuid.v4();
@@ -757,6 +758,7 @@ describe('Model', function () {
     const six = uuid.v4();
     const seven = uuid.v4();
     const eight = uuid.v4();
+    const nine = uuid.v4();
 
     let Foo;
 
@@ -787,28 +789,32 @@ describe('Model', function () {
     it('should create multiple records in the database', done => {
       const next = assume.wait(2, 2, done);
 
-      Foo.create({ fooId: one }, err => {
+      Foo.create({ fooId: one, secondaryId: one, nullableId: two }, err => {
         assume(err).is.falsey();
         next();
       });
 
-      Foo.create({ fooId: two }, err => {
+      Foo.create({ fooId: two, secondaryId: one, nullableId: two }, err => {
         assume(err).is.falsey();
         next();
       });
+
     });
 
     it('should create a record in the database that will properly expire with given ttl', done => {
-      Foo.create({ entity: { fooId: three }, ttl: 3 }, err => {
+      Foo.create({ entity: {
+        fooId: three,
+        secondaryId: zeros,
+        nullableId: zeros
+      }, ttl: 3 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: three }, (error, res) => {
+        Foo.findOne({ fooId: three, secondaryId: zeros }, (error, res) => {
           assume(error).is.falsey();
           assume(res);
-          assume(res.fooId).equals(three);
 
           setTimeout(() => {
-            Foo.findOne({ fooId: three }, (er, result) => {
+            Foo.findOne({ fooId: three, secondaryId: zeros }, (er, result) => {
               assume(er).is.falsey();
               assume(result).is.falsey();
               done();
@@ -819,16 +825,16 @@ describe('Model', function () {
     });
 
     it('should create a record in the database that will expire but still be found before it reaches given ttl', done => {
-      Foo.create({ entity: { fooId: four }, ttl: 7 }, err => {
+      Foo.create({ entity: { fooId: four, secondaryId: one }, ttl: 7 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: four }, (err, res) => {
+        Foo.findOne({ fooId: four, secondaryId: one }, (err, res) => {
           assume(err).is.falsey();
           assume(res);
           assume(res.fooId).equals(four);
 
           setTimeout(() => {
-            Foo.findOne({ fooId: four }, (err, result) => {
+            Foo.findOne({ fooId: four, secondaryId: one }, (err, result) => {
               assume(err).is.falsey();
               assume(result);
               assume(result.fooId).equals(four);
@@ -840,11 +846,11 @@ describe('Model', function () {
     });
 
     it('should update a record in the database that will expire with given ttl', done => {
-      Foo.update({ entity: { fooId: five, something: 'foo' }, ttl: 2 }, err => {
+      Foo.update({ entity: { fooId: five, secondaryId: one, something: 'foo' }, ttl: 2 }, err => {
         assume(err).is.falsey();
 
         setTimeout(() => {
-          Foo.findOne({ fooId: five }, (er, res) => {
+          Foo.findOne({ fooId: five, secondaryId: one }, (er, res) => {
             assume(er).is.falsey();
             assume(res).is.falsey();
             done();
@@ -854,16 +860,16 @@ describe('Model', function () {
     });
 
     it('should update a record in the database that can be found before it reaches ttl', done => {
-      Foo.update({ entity: { fooId: six, something: 'foo' }, ttl: 5 }, err => {
+      Foo.update({ entity: { fooId: six, secondaryId: one, something: 'foo' }, ttl: 5 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: six }, (error, result) => {
+        Foo.findOne({ fooId: six, secondaryId: one }, (error, result) => {
           assume(error).is.falsey();
           assume(result);
           assume(result.fooId).equals(six);
 
           setTimeout(() => {
-            Foo.findOne({ fooId: six }, (er, res) => {
+            Foo.findOne({ fooId: six, secondaryId: one }, (er, res) => {
               assume(er).is.falsey();
               assume(res);
               assume(res.fooId).equals(six);
@@ -875,19 +881,19 @@ describe('Model', function () {
     });
 
     it('should update a record in the database with an updated reset ttl and can be found before it reaches the updated ttl', done => {
-      Foo.update({ entity: { fooId: seven, something: 'boo' }, ttl: 3 }, err => {
+      Foo.update({ entity: { fooId: seven, secondaryId: one, something: 'boo' }, ttl: 3 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: seven }, (error, result) => {
+        Foo.findOne({ fooId: seven, secondaryId: one }, (error, result) => {
           assume(error).is.falsey();
           assume(result);
           assume(result.fooId).equals(seven);
 
-          Foo.update({ entity: { fooId: seven, something: 'foo' }, ttl: 10 }, error => {
+          Foo.update({ entity: { fooId: seven, secondaryId: one, something: 'foo' }, ttl: 10 }, error => {
             assume(error).is.falsey();
 
             setTimeout(() => {
-              Foo.findOne({ fooId: seven }, (er, res) => {
+              Foo.findOne({ fooId: seven, secondaryId: one }, (er, res) => {
                 assume(er).is.falsey();
                 assume(res);
                 assume(res.fooId).equals(seven);
@@ -900,25 +906,52 @@ describe('Model', function () {
     });
 
     it('should update a record in the database with an updated reset ttl and expire after it reaches the updated ttl', done => {
-      Foo.update({ entity: { fooId: eight, something: 'boo' }, ttl: 2 }, err => {
+      Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'boo' }, ttl: 2 }, err => {
         assume(err).is.falsey();
 
-        Foo.findOne({ fooId: eight }, (error, result) => {
+        Foo.findOne({ fooId: eight, secondaryId: one }, (error, result) => {
           assume(error).is.falsey();
           assume(result);
           assume(result.fooId).equals(eight);
 
-          Foo.update({ entity: { fooId: eight, something: 'foo' }, ttl: 3 }, error => {
+          Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'foo' }, ttl: 3 }, error => {
             assume(error).is.falsey();
 
             setTimeout(() => {
-              Foo.findOne({ fooId: eight }, (er, res) => {
+              Foo.findOne({ fooId: eight, secondaryId: one }, (er, res) => {
                 assume(er).is.falsey();
                 assume(res).is.falsey();
                 done();
               });
             }, 3000);
           });
+        });
+      });
+    });
+
+    it('handles nullable fields properly', done => {
+      Foo.create({ entity: {
+        fooId: nine,
+        secondaryId: zeros,
+        nullableId: zeros
+      }, ttl: 1 }, err => {
+        assume(err).is.falsey();
+
+        Foo.findOne({ fooId: nine, secondaryId: zeros }, (error, res) => {
+          assume(error).is.falsey();
+          assume(res);
+          assume(res.fooId).equals(nine);
+          assume(res.secondaryId).equals(zeros);
+          assume(res.nonNullableId).equals(zeros);
+          assume(res.nullableId).equals(null);
+
+          const resAsJson = res.toJSON();
+          assume(resAsJson.fooId).equals(nine);
+          assume(resAsJson.secondaryId).equals(zeros);
+          assume(resAsJson.nonNullableId).equals(zeros);
+          assume(resAsJson.nullableId).equals(null);
+
+          done();
         });
       });
     });
@@ -933,12 +966,12 @@ describe('Model', function () {
 
     it('should remove entities', done => {
       const next = assume.wait(2, 2, done);
-      Foo.remove({ fooId: one }, err => {
+      Foo.remove({ fooId: one, secondaryId: one }, err => {
         assume(err).is.falsey();
         next();
       });
 
-      Foo.remove({ fooId: two }, err => {
+      Foo.remove({ fooId: two, secondaryId: one }, err => {
         assume(err).is.falsey();
         next();
       });

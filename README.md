@@ -1001,6 +1001,10 @@ We make a few assumptions which have manifested as conventions in this library.
    production uses of cassandrai at GoDaddy. This is something that could be configurable
    in the future.
 
+   Fields that are defined as either `partitionKey()` or `clusteringKey()` will not
+   be converted to/from `null`. In addition, to exclude a field from this `null`
+   handling, define the field with `meta({ nullConversion: false })`.
+
 2. Casing, as mentioned briefly in the warning at the top of the readme, we assume
    `camelCase` as the casing convention when interacting with datastar and the
    models created with it. The schema is the only place where the keys used MUST
