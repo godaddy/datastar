@@ -1,21 +1,26 @@
 
 const assume = require('assume'),
-  entity     = require('../fixtures/dog'),
+  dogFixture = require('../fixtures/dog'),
   schemas    = require('../fixtures/schemas'),
   mocks      = require('../mocks'),
-  helpers    = require('../helpers');
+  helpers    = require('../helpers'),
+  cloneDeep  = require('lodash.clonedeep');
 
 assume.use(require('assume-sinon'));
 
 describe('Model instance (unit)', () => {
-  let dog;
-  const datastar = helpers.connectDatastar({ mock: true }, mocks.datastar());
-  const Dog = datastar.define('dog', {
-    schema: schemas.dog
+  let dog, Dog, datastar, entity;
+
+  beforeEach(() => {
+    datastar = helpers.connectDatastar({ mock: true }, mocks.datastar());
+    Dog = datastar.define('dog', {
+      schema: schemas.dog
+    });
+    entity = cloneDeep(dogFixture);
+    dog = Dog.toInstance(entity);
   });
 
   it('should "transform" data into an instance of the defined model', () => {
-    dog = Dog.toInstance(entity);
     assume(dog).is.instanceof(Dog);
   });
 
@@ -42,6 +47,13 @@ describe('Model instance (unit)', () => {
       dog.id = 'invalid guid';
       assume(dog.validate()).is.instanceof(Error);
     });
+  });
+
+  it('should handle de-nulling cyclic objects', () => {
+    dog.owner.puppies = [dog]; // inject cyclic reference
+    // See https://github.com/godaddy/datastar/pull/27
+    // Previously, this would cause recursive loop (Max call stack size exceeded error)
+    assume(dog.owner).exists();
   });
 });
 
