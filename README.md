@@ -662,7 +662,7 @@ those records as they come instead of waiting to buffer them all into memory.
 For example, if we were doing this inside a request handler:
 
 ```js
-var through = require('through2');
+var { Transform } = require('stream');
 
 //
 // Fetch sodas handler
@@ -676,11 +676,15 @@ function handler(req, res) {
     res.writeHead(500);
     res.end(JSON.stringify({ error: err.message }));
   })
-  .pipe(through.obj(function (bev, enc, callback) {
-    //
-    // Massage the beverage object in some way before returning it to the user
-    //
-    callback(null, massageBeverage(bev));
+  .pipe(new Transform({
+    writableObjectMode: true,
+    readableObjectMode: true,
+    transform(bev, enc, callback) {
+      //
+      // Massage the beverage object in some way before returning it to the user
+      //
+      callback(null, massageBeverage(bev));
+    }
   }))
   .pipe(res);
 }

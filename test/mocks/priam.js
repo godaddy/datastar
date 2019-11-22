@@ -1,4 +1,4 @@
-var through = require('through2');
+const { PassThrough } = require('stream');
 /*
  * function Priam (opts)
  * Constructor function for the Priam mock responsible for
@@ -48,7 +48,7 @@ Chainable.prototype.add = function (statement) {
   return this;
 };
 Chainable.prototype.stream = function () {
-  var stream = through.obj();
+  var stream = new PassThrough({ objectMode: true });
   stream.end();
   return stream;
 };
