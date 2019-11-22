@@ -1,9 +1,9 @@
 'use strict';
 
-module.exports = function (datastar, models) {
-  var cql = datastar.schema.cql;
+module.exports = function (datastar) {
+  const cql = datastar.schema.cql;
 
-  var Artist = datastar.define('artist', {
+  return datastar.define('artist', {
     schema: datastar.schema.object({
       artist_id: cql.uuid(),
       name: cql.text(),
@@ -22,6 +22,4 @@ module.exports = function (datastar, models) {
       }
     }
   });
-
-  return Artist;
 };

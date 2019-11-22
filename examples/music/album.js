@@ -1,9 +1,9 @@
 'use strict';
 
-module.exports = function (datastar, models) {
-  var cql = datastar.schema.cql;
+module.exports = function (datastar) {
+  const cql = datastar.schema.cql;
 
-  var Album = datastar.define('album', {
+  return datastar.define('album', {
     schema: datastar.schema.object({
       album_id: cql.uuid(),
       artist_id: cql.uuid(),
@@ -16,6 +16,4 @@ module.exports = function (datastar, models) {
     }).partitionKey('artist_id')
       .clusteringKey('album_id')
   });
-
-  return Album;
 };
