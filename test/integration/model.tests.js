@@ -17,10 +17,6 @@ describe('Model', function () {
     helpers.load((err, data) => {
       assume(err).to.equal(null);
       datastar = helpers.connectDatastar({ config: data.cassandra }, Datastar, done);
-      /* cassandra = new driver.Client({
-       contactPoints: data.cassandra.hosts,
-       keyspace: data.cassandra.keyspace
-       });*/
     });
   });
 

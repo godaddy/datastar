@@ -46,10 +46,12 @@ This module is open source! That means **we want your contributions!**
 var Datastar = require('datastar');
 var datastar = new Datastar({
   config: {
-    user: 'cassandra',
-    password: 'cassandra',
+    credentials: {
+      username: 'cassandra',
+      password: 'cassandra'
+    },
     keyspace: 'a_fancy_keyspace',
-    hosts: ['127.0.0.1', 'host2', 'host3']
+    contactPoints: ['127.0.0.1', 'host2', 'host3']
   }
 }).connect();
 
@@ -96,14 +98,16 @@ All constructor options are passed directly to [Priam](https://github.com/godadd
 var Datastar = require('datastar');
 var datastar = new Datastar({
   config: {
-    // who am I connecting as
-    user: 'cassandra',
-    // what's my password
-    password: 'cassandra',
+    credentials: {
+      // who am I connecting as
+      username: 'cassandra',
+      // what's my password
+      password: 'cassandra'
+    },
     // what keyspace am I using
     keyspace: 'a_fancy_keyspace',
     // what cluster hosts do I know about
-    hosts: ['127.0.0.1', 'host2', 'host3']
+    contactPoints: ['127.0.0.1', 'host2', 'host3']
   }
 });
 ```

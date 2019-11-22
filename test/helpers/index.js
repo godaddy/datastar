@@ -31,11 +31,11 @@ exports.load = function (env, callback) {
 
   function createKeyspace(data) {
     var client = new cassandra.Client({
-      contactPoints: data.cassandra.hosts,
+      contactPoints: data.cassandra.contactPoints,
       localDataCenter: data.cassandra.localDataCenter,
       authProvider: new cassandra.auth.PlainTextAuthProvider(
-        data.cassandra.user,
-        data.cassandra.password
+        data.cassandra.credentials.username,
+        data.cassandra.credentials.password
       )
     });
 
