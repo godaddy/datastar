@@ -1,5 +1,4 @@
 var through = require('through2');
-var readOnly = require('read-only-stream');
 /*
  * function Priam (opts)
  * Constructor function for the Priam mock responsible for
@@ -51,7 +50,7 @@ Chainable.prototype.add = function (statement) {
 Chainable.prototype.stream = function () {
   var stream = through.obj();
   stream.end();
-  return readOnly(stream);
+  return stream;
 };
 
 /*
