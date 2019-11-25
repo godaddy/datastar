@@ -43,8 +43,8 @@ This module is open source! That means **we want your contributions!**
 ## Usage
 
 ``` js
-var Datastar = require('datastar');
-var datastar = new Datastar({
+const Datastar = require('datastar');
+const datastar = new Datastar({
   config: {
     credentials: {
       username: 'cassandra',
@@ -55,9 +55,9 @@ var datastar = new Datastar({
   }
 }).connect();
 
-var cql = datastar.schema.cql;
+const cql = datastar.schema.cql;
 
-var Artist = datastar.define('artist', {
+const Artist = datastar.define('artist', {
   schema: datastar.schema.object({
     artist_id: cql.uuid(),
     name: cql.text(),
@@ -95,8 +95,8 @@ Artist.create({
 All constructor options are passed directly to [Priam](https://github.com/godaddy/node-priam) so any options Priam supports, Datastar supports.
 
 ```js
-var Datastar = require('datastar');
-var datastar = new Datastar({
+const Datastar = require('datastar');
+const datastar = new Datastar({
   config: {
     credentials: {
       // who am I connecting as
@@ -117,7 +117,7 @@ var datastar = new Datastar({
 Given a set of cassandra information, connect to the cassandra constructor. **This must be called before you do any model creation, finding, schema defintion, etc.**
 
 ```js
-var datastar = new Datastar(...);
+let datastar = new Datastar(...);
 // I setup the connection, but I'm not connected yet, let's connect!
 datastar = datastar.connect();
 ```
@@ -131,7 +131,7 @@ Define is the primary way to create `Models` while using Datastar. See the follo
 //
 // main definition function, pass a name of the model (table), and it's corresponding schema
 //
-var Album = datastar.define('album', {
+const Album = datastar.define('album', {
   //
   // ensure that the table exists. This executes an implicit CREATE IF NOT EXISTS
   // statement. You can listen for completio using the `ensure-tables:finished`
@@ -184,7 +184,7 @@ otherwise you can go more granular with `readConsistency` and
 corresponds with a consistency that cassandra allows.
 
 ```js
-var Album = datastar.define('album', {
+const Album = datastar.define('album', {
   schema: albumSchema,
   readConsistency: 'localQuorum',
   writeConsitency: 'one'
@@ -279,7 +279,7 @@ CQL Data Type | Validation Type
 This functionality that we built into `datastar` exists in order to optimize queries for other unique keys on your main table. By default Cassandra has the ability to do this for you by building an index for that key. The only problem is that the current backend storage of Cassandra can make these very slow and under performant. If this is a high traffic query pattern, this could lead you to having issues with your database. We work around this limitation by simply creating more tables and doing an extra write to the database. Since Cassandra is optimized for handling a heavy write workload, this becomes trivial. We take care of the complexity of keeping these tables in sync for you. Lets look at an example by modifying our `Artist` model.
 
 ```js
-var Artist = datastar.define('artist', {
+const Artist = datastar.define('artist', {
   schema: datastar.schema.object({
     artist_id: cql.uuid(),
     name: cql.text(),
@@ -297,8 +297,7 @@ var Artist = datastar.define('artist', {
     }
   }
 });
-
- ```
+```
 
 In our example above we added `name` as a `lookupKey` to our `Artist` model. This means a few things:
 
@@ -327,9 +326,9 @@ Artist.findOne({
 Once you have created a `Model` using `datastar.define` you can start creating records against the Cassandra database you have configured in your options or passed to `datastar.connect`:
 
 ``` js
-var cql = datastar.schema.cql;
+const cql = datastar.schema.cql;
 
-var Beverage = datastar.define('beverage', {
+const Beverage = datastar.define('beverage', {
   schema: datastar.schema.object({
     'beverage_id': cql.uuid({ default: 'v4' }),
     'name': cql.text(),
@@ -435,7 +434,7 @@ table has changed.
  > understand this warning or the implications, please post an issue.
 
 ```js
-var Person = datastar.define('person', {
+const Person = datastar.define('person', {
   ensureTables: true,
   schema: datastar.schema.object({
     person_id: datastar.schema.cql.uuid({ default: 'v4' }),
@@ -456,7 +455,7 @@ var Person = datastar.define('person', {
 //
 // person Object
 //
-var person = {
+const person = {
   name: 'Fred Flinstone',
   attributes: {
     height: '6 foot 1 inch'
@@ -662,7 +661,7 @@ those records as they come instead of waiting to buffer them all into memory.
 For example, if we were doing this inside a request handler:
 
 ```js
-var { Transform } = require('stream');
+const { Transform } = require('stream');
 
 //
 // Fetch sodas handler
@@ -825,7 +824,7 @@ Beverage.before('create:execute', function (options, callback) {
 // calls its callback.
 // NOTE: This assumes the same columns exist in this other keyspace
 //
-var otherDataCenterConnection = new Priam(connectOpts);
+const otherDataCenterConnection = new Priam(connectOpts);
 Beverage.after('create:execute', function (options, callback) {
   //
   // Reuse the statement collection from the create operation to execute the
@@ -883,7 +882,7 @@ Beverage.after('find:one', function (result, callback) {
     //
     // TODO: Have instance functions for this type of thing
     //
-    var update = bev.toJSON();
+    const update = bev.toJSON();
     //
     // Do the more efficient update to cassandra on the `set` type.
     //
@@ -911,7 +910,7 @@ Each `Model` is capable of creating the Cassandra tables associated with its `sc
 To ensure that a table is created you can pass the `ensureTables` option:
 
 ```js
-var Spice = datastar.define('spice', {
+const Spice = datastar.define('spice', {
   ensureTables: true,
   schema: /* a valid schema */
 })

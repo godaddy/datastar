@@ -1,9 +1,10 @@
-var path    = require('path'),
+const
+  path      = require('path'),
   util      = require('util'),
   Datastar  = require('../../lib'),
   cassandra = require('cassandra-driver');
 
-var model = Datastar.Model;
+const model = Datastar.Model;
 
 /*
  * @param {configs} Object
@@ -30,7 +31,7 @@ exports.load = function (env, callback) {
   }
 
   function createKeyspace(data) {
-    var client = new cassandra.Client({
+    const client = new cassandra.Client({
       contactPoints: data.cassandra.contactPoints,
       localDataCenter: data.cassandra.localDataCenter,
       authProvider: new cassandra.auth.PlainTextAuthProvider(
@@ -60,7 +61,7 @@ exports.load = function (env, callback) {
   // If `DATASTAR_CONFIG` is set then load from
   // that file.
   //
-  var configFile = process.env.DATASTAR_CONFIG || path.join(__dirname, '..', 'config', 'config.example.json');
+  const configFile = process.env.DATASTAR_CONFIG || path.join(__dirname, '..', 'config', 'config.example.json');
 
   return createKeyspace(require(configFile));
 };

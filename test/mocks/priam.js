@@ -1,66 +1,74 @@
 const { PassThrough } = require('stream');
-/*
- * function Priam (opts)
- * Constructor function for the Priam mock responsible for
- * mocking our communication with Cassandra.
- */
-var Priam = module.exports = function Priam(opts) {
-  this.options = opts;
-};
 
-/*
- * Alias the priam connect function
- */
-Priam.prototype.connect = function (keyspace, callback) {
-  if (!callback) {
-    callback = keyspace;
-    keyspace = null;
+class Priam {
+
+  /*
+  * function Priam (opts)
+  * Constructor function for the Priam mock responsible for
+  * mocking our communication with Cassandra.
+  */
+  constructor(opts) {
+    this.options = opts;
   }
 
-  setImmediate(callback);
-};
+  /*
+  * Alias the priam connect function
+  */
+  connect(keyspace, callback) {
+    if (!callback) {
+      callback = keyspace;
+      keyspace = null;
+    }
+
+    setImmediate(callback);
+  }
+
+  beginQuery() {
+    return new Chainable();
+  }
+}
 
 /*
  * function beginBatch ()
  * function beginQuery ()
  * Begins a new batch.
  */
-Priam.prototype.beginBatch =
-  Priam.prototype.beginQuery = function () {
-    return new Chainable();
+Priam.prototype.beginBatch = Priam.prototype.beginQuery;
+
+class Chainable {
+  /*
+  * function Chainable
+  * Constructor function for a mock batch
+  * or query.
+  */
+  constructor() {
+    this.statements = [];
+  }
+
+  /*
+  * function add (statement)
+  * Adds the statement to this Chainable instance.
+  */
+  add(statement) {
+    this.statements.push(statement);
+    return this;
   };
 
-/*
- * function Chainable
- * Constructor function for a mock batch
- * or query.
- */
-function Chainable() {
-  this.statements = [];
+  stream() {
+    const stream = new PassThrough({ objectMode: true });
+    stream.end();
+    return stream;
+  }
+
+  /*
+  * function execute (callback)
+  * Invokes the callback in the next tick
+  */
+  execute(callback) {
+    setImmediate(callback);
+    return this;
+  }
 }
-
-/*
- * function add (statement)
- * Adds the statement to this Chainable instance.
- */
-Chainable.prototype.add = function (statement) {
-  this.statements.push(statement);
-  return this;
-};
-Chainable.prototype.stream = function () {
-  var stream = new PassThrough({ objectMode: true });
-  stream.end();
-  return stream;
-};
-
-/*
- * function execute (callback)
- * Invokes the callback in the next tick
- */
-Chainable.prototype.execute = function (callback) {
-  setImmediate(callback);
-  return this;
-};
 
 /*
  * function query (cql)
@@ -71,11 +79,12 @@ Chainable.prototype.execute = function (callback) {
  * Invokes the callback in the next tick
  */
 Chainable.prototype.single =
-  Chainable.prototype.consistency =
-    Chainable.prototype.first =
-      Chainable.prototype.query =
-        Chainable.prototype.options =
-          Chainable.prototype.params = function () {
-            return this;
-          };
+Chainable.prototype.consistency =
+Chainable.prototype.first =
+Chainable.prototype.query =
+Chainable.prototype.options =
+Chainable.prototype.params = function () {
+  return this;
+};
 
+module.exports =  Priam;

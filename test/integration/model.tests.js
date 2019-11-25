@@ -175,7 +175,7 @@ describe('Model', function () {
         async.waterfall([
           Artist.find.bind(Artist, findOptions),
           (result, next) => {
-            var res = result[0];
+            const res = result[0];
             assume(result.length).to.equal(1);
             assume(res.id).to.be.a('string');
             assume(res.name).to.be.a('string');

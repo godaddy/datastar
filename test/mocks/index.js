@@ -1,4 +1,4 @@
-var proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire');
 
 //
 // Exports our prototypal mocks.

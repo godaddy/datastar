@@ -1,8 +1,5 @@
-
-
-var joi = require('joi-of-cql');
-
-var cql = joi.cql;
+const joi = require('joi-of-cql');
+const cql = joi.cql;
 
 /**
  * @property schemas {Object}
@@ -71,4 +68,3 @@ module.exports = {
   }).partitionKey('foo_id')
     .clusteringKey('secondary_id')
 };
-

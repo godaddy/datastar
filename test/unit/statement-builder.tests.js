@@ -226,8 +226,8 @@ describe('StatementBuilder', () => {
   describe('TableStatment { schema } valid', () => {
     let entity;
     it('build()', done => {
-      var schema = new Schema('artist', schemas.artist);
-      var builder = new StatementBuilder(schema);
+      const schema = new Schema('artist', schemas.artist);
+      const builder = new StatementBuilder(schema);
       const statement = builder.table({ type: 'ensure' });
       fs.readFile(path.join(fixturesDir, 'tables', 'artist.cql'), 'utf8', (err, data) => {
         assert(!err);
