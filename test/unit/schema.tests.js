@@ -58,9 +58,7 @@ describe('Schema (unit)', () => {
       helloThere: 'new things'
     };
     debug(schema.validator);
-    const valid = schema.validate(schema.fixKeys(entity));
-    assume(valid.details).is.truthy();
-    debug(valid);
+    assume(() => schema.validate(schema.fixKeys(entity))).throws();
   });
 
   it('should allow for null values', () => {

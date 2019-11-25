@@ -101,6 +101,7 @@ exports.connectDatastar = function (opts, Proto, callback) {
  */
 exports.stubModel = function (sinon) {
   model.before = sinon.stub();
+  model.waterfall = sinon.stub();
   model.ensureTables = sinon.stub();
 
   return model;

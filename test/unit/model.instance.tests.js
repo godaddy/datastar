@@ -43,9 +43,9 @@ describe('Model instance (unit)', () => {
       assume(dog.validate()).is.deep.equal({ id: dog.id, weight: 80 });
     });
 
-    it('should return the validation error', () => {
+    it('should throw the validation error', () => {
       dog.id = 'invalid guid';
-      assume(dog.validate()).is.instanceof(Error);
+      assume(() => dog.validate()).throws();
     });
   });
 

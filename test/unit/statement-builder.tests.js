@@ -52,15 +52,13 @@ describe('StatementBuilder', () => {
       assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist LIMIT 2');
     });
 
-    it('should return an error when passed conditions that get filtered (non primary keys)', () => {
-      const statement = builder.find({
+    it('should throw an error when passed conditions that get filtered (non primary keys)', () => {
+      assume(() => builder.find({
         type: 'find',
         conditions: {
           createDate: new Date()
         }
-      });
-
-      assume(statement).is.an.Error;
+      })).throws();
     });
 
     it('should return a find statement with query params', () => {
@@ -88,16 +86,14 @@ describe('StatementBuilder', () => {
       entity = clone(artistEntity);
     });
 
-    it('(Find test) should return an error when passed conditions with conflicting lookup tables', () => {
-      const statement = b.find({
+    it('(Find test) should throw an error when passed conditions with conflicting lookup tables', () => {
+      assume(() => b.find({
         type: 'single',
         conditions: {
           artistId: uuid.v4(),
           name: 'whatever'
         }
-      });
-
-      assume(statement).is.instanceof(Error);
+      })).throws();
     });
 
     it('should return a valid statement that uses the proper lookup table for find when querying by domainName', () => {
@@ -123,11 +119,11 @@ describe('StatementBuilder', () => {
       });
     });
 
-    it('should return a validation error when trying to create without all of the lookup tables', () => {
+    it('should throw a validation error when trying to create without all of the lookup tables', () => {
       const ent = clone(entity);
       delete ent.name;
-      const statement = b.create({}, ent);
-      assume(statement).is.instanceof(Error);
+
+      assume(() => b.create({}, ent)).throws();
     });
 
     function setupPrevious(entity) {
@@ -190,14 +186,12 @@ describe('StatementBuilder', () => {
       });
     });
 
-    it('should return an error when trying to delete with no conditions when there is a lookup table', () => {
-      const statement = b.remove({}, {});
-      assume(statement).is.instanceof(Error);
+    it('should throw an error when trying to delete with no conditions when there is a lookup table', () => {
+      assume(() => b.remove({}, {})).throws();
     });
 
-    it('should return an error FOR NOW when trying to delete with insufficient conditions', () => {
-      const statement = b.remove({}, { id: uuid.v4() });
-      assume(statement).is.instanceof(Error);
+    it('should throw an error FOR NOW when trying to delete with insufficient conditions', () => {
+      assume(() => b.remove({}, { id: uuid.v4() })).throws();
     });
   });
 
@@ -205,21 +199,17 @@ describe('StatementBuilder', () => {
   // This is also tested in cases within TableStatement
   //
   describe('AlterStatement', () => {
-    it('should return an error when given a bad type', () => {
-      const statement = builder.alter({ type: 'NANANANA' });
-
-      assume(statement).is.instanceof(Error);
+    it('should throw an error when given a bad type', () => {
+      assume(() => builder.alter({ type: 'NANANANA' })).throws();
     });
 
-    it('should return an error when given an unknown arg type', () => {
-      const statement = builder.alter({
+    it('should throw an error when given an unknown arg type', () => {
+      assume(() => builder.alter({
         type: 'table',
         actions: {
           something: new RegExp()
         }
-      });
-
-      assume(statement).is.instanceof(Error);
+      })).throws();
     });
   });
 
@@ -276,13 +266,11 @@ describe('StatementBuilder', () => {
       assume(statement.cql.indexOf('WITH CLUSTERING ORDER BY (create_date);')).is.above(0);
     });
 
-    it('should return an error when given a bad key to orderBy', () => {
-      const statement = builder.table({
+    it('should throw an error when given a bad key to orderBy', () => {
+      assume(() => builder.table({
         type: 'ensure',
         orderBy: { key: 'createdAt' }
-      });
-
-      assume(statement).is.instanceof(Error);
+      })).throws();
     });
 
     it('should return a table statement with proper alterations', () => {
@@ -474,15 +462,12 @@ describe('StatementBuilder', () => {
       assume(statement.params[0].value).to.equal(id);
     });
 
-    it('should return an error when passed an entity without a primary key', () => {
-      const statement = builder.remove({}, { createDate: new Date() });
-
-      assume(statement).is.an.Error;
+    it('should throw an error when passed an entity without a primary key', () => {
+      assume(() => builder.remove({}, { createDate: new Date() })).throws();
     });
 
-    it('should return an error when passed empty conditions ', () => {
-      const statement = builder.remove({}, {});
-      assume(statement).is.an.Error;
+    it('should throw an error when passed empty conditions ', () => {
+      assume(() => builder.remove({}, {})).throws();
     });
 
     it('should return a proper RemoveStatement when passed a set of conditions', () => {
@@ -549,11 +534,10 @@ describe('StatementBuilder', () => {
       assume(statement.cql).contains('USING TTL 864342');
     });
 
-    it('should return an error when given an improper entity', () => {
+    it('should throw an error when given an improper entity', () => {
       const ent = clone(entity);
       delete ent.artistId;
-      const statement = builder.create({}, ent);
-      assume(statement).is.instanceof(Error);
+      assume(() => builder.create({}, ent)).throws();
     });
   });
 });
