@@ -802,7 +802,7 @@ describe('Model', function () {
         fooId: three,
         secondaryId: zeros,
         nullableId: zeros
-      }, ttl: 3 }, err => {
+      }, ttl: 1 }, err => {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: three, secondaryId: zeros }, (error, res) => {
@@ -815,7 +815,7 @@ describe('Model', function () {
               assume(result).is.falsey();
               done();
             });
-          }, 3000);
+          }, 1100);
         });
       });
     });
@@ -836,7 +836,7 @@ describe('Model', function () {
               assume(result.fooId).equals(four);
               done();
             });
-          }, 3000);
+          }, 100);
         });
       });
     });
@@ -877,7 +877,7 @@ describe('Model', function () {
     });
 
     it('should update a record in the database with an updated reset ttl and can be found before it reaches the updated ttl', done => {
-      Foo.update({ entity: { fooId: seven, secondaryId: one, something: 'boo' }, ttl: 3 }, err => {
+      Foo.update({ entity: { fooId: seven, secondaryId: one, something: 'boo' }, ttl: 1 }, err => {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: seven, secondaryId: one }, (error, result) => {
@@ -895,14 +895,14 @@ describe('Model', function () {
                 assume(res.fooId).equals(seven);
                 done();
               });
-            }, 5000);
+            }, 1100);
           });
         });
       });
     });
 
     it('should update a record in the database with an updated reset ttl and expire after it reaches the updated ttl', done => {
-      Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'boo' }, ttl: 2 }, err => {
+      Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'boo' }, ttl: 1 }, err => {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: eight, secondaryId: one }, (error, result) => {
@@ -910,7 +910,7 @@ describe('Model', function () {
           assume(result);
           assume(result.fooId).equals(eight);
 
-          Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'foo' }, ttl: 3 }, error => {
+          Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'foo' }, ttl: 1 }, error => {
             assume(error).is.falsey();
 
             setTimeout(() => {
@@ -919,7 +919,7 @@ describe('Model', function () {
                 assume(res).is.falsey();
                 done();
               });
-            }, 3000);
+            }, 1100);
           });
         });
       });
