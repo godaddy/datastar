@@ -27,7 +27,7 @@ describe('Schema (unit)', () => {
 
     function init() {
       // eslint-disable-next-line
-      Schema('invalid', invalid);
+      new Schema('invalid', invalid);
     }
 
     assume(init).throws(/must define a partitionKey/);
@@ -36,7 +36,7 @@ describe('Schema (unit)', () => {
   it('should throw an error when given an invalid name for the schema', () => {
     function init() {
       // eslint-disable-next-line
-      Schema('has-dashes');
+      new Schema('has-dashes');
     }
 
     assume(init).throws('Invalid character in schema name');
