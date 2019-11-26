@@ -320,7 +320,6 @@ Artist.findOne({
 });
 ```
 
-
 ### Model.create
 
 Once you have created a `Model` using `datastar.define` you can start creating records against the Cassandra database you have configured in your options or passed to `datastar.connect`:
@@ -361,8 +360,7 @@ Model.create({ entities: properties });
 
 // Create a two models: one with properties
 // and the second with properties2
-Model.create({ entities [properties, properties2] })
-
+Model.create({ entities: [properties, properties2] })
 ```
 
 ### Model.update
@@ -686,6 +684,22 @@ function handler(req, res) {
     }
   }))
   .pipe(res);
+}
+```
+
+#### Async Iterable API
+
+The async iterable API, like the stream API, provides another convenient way to process records as they come in. If you do not need the full feature set of node streams, this is a more efficient technique.
+
+To access the async iterable API, set the `iterable` option to `true` in your call to `.find()` or `.findAll()`. Alternately, call the `.iterate()` method of your model, which is equivalent to `.findAll({ ..., iterable: true })`.
+
+```js
+async function getAllArtistTracks(artistId) {
+  let allTracks = [];
+  for await (const album of Album.iterate({ conditions: { artistId } })) {
+    allTracks = allTracks.concat(album.trackList);
+  }
+  return new Set(allTracks);
 }
 ```
 

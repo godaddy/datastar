@@ -1,6 +1,8 @@
 /* jshint camelcase: false */
 
-const assume = require('assume'),
+const
+  { Stream } = require('stream'),
+  assume     = require('assume'),
   uuid       = require('uuid'),
   async      = require('async'),
   clone      = require('clone'),
@@ -554,9 +556,9 @@ describe('Model', function () {
         ids = {};
       }
       async.parallel({
-        otherId: Song.findOne.bind(Song, { conditions: { otherId: ids.otherId || otherId }}),
-        uniqueId: Song.findOne.bind(Song, { conditions: { uniqueId: ids.uniqueId || uniqueId }}),
-        id: Song.findOne.bind(Song, { conditions: { id: ids.id || id }})
+        otherId: Song.findOne.bind(Song, { conditions: { otherId: ids.otherId || otherId } }),
+        uniqueId: Song.findOne.bind(Song, { conditions: { uniqueId: ids.uniqueId || uniqueId } }),
+        id: Song.findOne.bind(Song, { conditions: { id: ids.id || id } })
       }, callback);
     }
 
@@ -972,6 +974,62 @@ describe('Model', function () {
         next();
       });
     });
+  });
+
+  describe('async iterable functionality', () => {
+    let artistId, Album;
+
+    before(done => {
+      artistId = uuid();
+      Album = datastar.define('album', { schema: schemas.album });
+
+      async.auto({
+        tableCreated: next => Album.ensureTables(next),
+        createRows: ['tableCreated', next => {
+          async.parallel([
+            Album.create.bind(Album, {
+              id: uuid(),
+              artistId,
+              trackList: ['a', 'b']
+            }),
+            Album.create.bind(Album, {
+              id: uuid(),
+              artistId,
+              trackList: ['c', 'd']
+            })
+          ], next);
+        }]
+      }, done);
+    });
+
+    after(done => {
+      Album.dropTables(done);
+    });
+
+    it('can be invoked through an `iterable` flag sent to `find`', async () => {
+      await testIterable(() => Album.findAll({
+        conditions: { artistId },
+        iterable: true
+      }));
+    });
+
+    it('can be invoked through an `iterate` method', async () => {
+      await testIterable(() => Album.iterate({ conditions: { artistId } }));
+    });
+
+    async function testIterable(iterateFn) {
+      const iterable = iterateFn();
+      assume(iterable).not.instanceof(Stream);
+      let allTracks = [];
+      for await (const album of iterable) {
+        allTracks = allTracks.concat(album.trackList);
+      }
+      const trackSet = new Set(allTracks);
+      assume(trackSet.has('a')).equals(true);
+      assume(trackSet.has('b')).equals(true);
+      assume(trackSet.has('c')).equals(true);
+      assume(trackSet.has('d')).equals(true);
+    }
   });
 
   function find(Entity, id, callback) {
