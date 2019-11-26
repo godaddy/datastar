@@ -760,12 +760,11 @@ that allow you to hook into and  modify the execution of a given statement. Firs
 This provides a way to add extensibility to any operation you perform on a
 specific `model`. Lets take a look at what this could look like.
 
+Before build is before we create the `statement(s)` that we then collect to
+execute and insert into Cassandra. This allows us to modify any of the
+entities before CQL is generated for them.
+
 ```js
-//
-// Before build is before we create the `statement(s)` that we then collect to
-// execute and insert into Cassandra. This allows us to modify any of the
-// entities before CQL is generated for them
-//
 Beverage.before('create:build', function (options, callback) {
   //
   // We create our own option that gets passed in by the beverage option that
@@ -794,15 +793,16 @@ Beverage.before('create:build', function (options, callback) {
   //
   callback();
 });
+```
 
-//
-// Before execute is right before we actually send the statements to cassandra!
-// This is where we have a chance to modify the statements or
-// `StatementCollection` with any other statements we may have or even to just
-// the `consistency` we are asking of cassandra if there is only a narrow case
-// where you require a consistency of `one`. (You could also just pass
-// option.consistency into the function call as well)
-//
+Before execute is right before we actually send the statements to cassandra.
+This is where we have a chance to modify the statements or
+`StatementCollection` with any other statements we may have or even to just
+the `consistency` we are asking of cassandra if there is only a narrow case
+where you require a consistency of `one`. (You could also just pass
+option.consistency into the function call as well)
+
+```js
 Beverage.before('create:execute', function (options, callback) {
   if (options.commitFast) {
     options.statements.consistency('one');
@@ -815,15 +815,16 @@ Beverage.before('create:execute', function (options, callback) {
 
   callback();
 });
+```
 
-//
-// An `after` hook might for `execute` might look like this if we wanted to
-// insert the same data into a separate keyspace using a different `Priam`
-// instance. Which would be a separate connection to cassandra. This call is
-// ensured to be executed before the `Beverage.create(opts, callback)` function
-// calls its callback.
-// NOTE: This assumes the same columns exist in this other keyspace
-//
+An `after` hook for `execute` might look like this if we wanted to
+insert the same data into a separate keyspace using a different `Priam`
+instance. Which would be a separate connection to cassandra. This call is
+ensured to be executed before the `Beverage.create(opts, callback)` function
+calls its callback.
+NOTE: This assumes the same columns exist in this other keyspace
+
+```js
 const otherDataCenterConnection = new Priam(connectOpts);
 Beverage.after('create:execute', function (options, callback) {
   //
@@ -834,23 +835,23 @@ Beverage.after('create:execute', function (options, callback) {
 
   options.statements.execute(callback);
 });
+```
 
-//
-// The last type of hook we have is for the specific `find` operations
-// including. `find:all`, `find:one`, `find:count`, `find:first`. These specifc
-// are the same as the above `:build` hooks in when they execute but have
-// different and more useful semantics for `after` hooks for modifying data
-// fetched. This makes use of [`Understudy's`][understudy] `.waterfall`
-// function.
-//
+The last types of hook we have is for the specific `find` operations
+including. `find:all`, `find:one`, `find:count`, `find:first`. These specifc
+are the same as the above `:build` hooks in when they execute but have
+different and more useful semantics for `after` hooks for modifying data
+fetched. This makes use of [`Understudy's`][understudy] `.waterfall`
+function. An important caveat is that `find` hooks are _not_ executed when you
+use the streaming option.
 
-//
-// The after hooks on `find:one` allow us to mutate the result returned from any
-// `findOne` query taken on beverage. This could allow us to call an external
-// service to fetch extra properties or anything else you can think of. The main
-// goal is to provide the extensibility to do what you want without `datastar`
-// getting in your way.
-//
+This after hooks on `find:one` allow us to mutate the result returned from any
+`findOne` query taken on beverage. This could allow us to call an external
+service to fetch extra properties or anything else you can think of. The main
+goal is to provide the extensibility to do what you want without `datastar`
+getting in your way.
+
+```js
 Beverage.after('find:one', function (result, callback) {
   //
   // Populate associated sibling models on every `findOne` or `get` query
@@ -864,12 +865,12 @@ Beverage.after('find:one', function (result, callback) {
     callback()
   });
 });
+```
 
-//
-// We can even add another after hook after this one which will get executed in
-// series and be able to modify any new attributes!
-//
+We can even add another after hook after this one which will get executed in
+series and be able to modify any new attributes!
 
+```js
 Beverage.after('find:one', function (result, callback) {
   //
   // Now that siblings are populated, modify their siblings if they arent
@@ -899,9 +900,7 @@ Beverage.after('find:one', function (result, callback) {
     result.siblings = res;
     callback();
   });
-
 });
-
 ```
 
 ### Create tables
