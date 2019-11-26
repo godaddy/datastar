@@ -49,6 +49,9 @@
     "schemas",
     "data modeling"
   ],
+  "engines": {
+    "node": "^10.17.0 || >=12.0.0"
+  },
   "author": "GoDaddy Engineers",
   "license": "MIT"
 }

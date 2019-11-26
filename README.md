@@ -857,7 +857,7 @@ are the same as the above `:build` hooks in when they execute but have
 different and more useful semantics for `after` hooks for modifying data
 fetched. This makes use of [`Understudy's`][understudy] `.waterfall`
 function. An important caveat is that `find` hooks are _not_ executed when you
-use the streaming option.
+use the streaming option. If you want to convert all records from your queries, see [Record Transformation](#record-transformation) for a technique that works for all types of queries.
 
 This after hooks on `find:one` allow us to mutate the result returned from any
 `findOne` query taken on beverage. This could allow us to call an external
@@ -915,6 +915,17 @@ Beverage.after('find:one', function (result, callback) {
     callback();
   });
 });
+```
+
+### Record Transformation
+
+Assign a `transform` method to your model to synchronously modify all records coming back from a query; this technique works for the callback, streaming, or async iterable methods of querying:
+
+```js
+Beverage.transform = before => ({
+  ...before,
+  isDiet: before.sugar <= 0
+})
 ```
 
 ### Create tables
@@ -1094,5 +1105,6 @@ npm run coverage
 - [Steve Commisso](https://github.com/scommisso)
 - [Joe Junker](https://github.com/JosephJNK)
 - [Bill Enterline](https://github.com/enterline)
+- [Jacob Page](https://github.com/DullReferenceException)
 
 [understudy]: https://github.com/bmeck/understudy

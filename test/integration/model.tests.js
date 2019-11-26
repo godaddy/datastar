@@ -978,6 +978,7 @@ describe('Model', function () {
 
   describe('async iterable functionality', () => {
     let artistId, Album;
+    const YEAR = 365 * 24 * 60 * 60 * 1000;
 
     before(done => {
       artistId = uuid();
@@ -990,12 +991,14 @@ describe('Model', function () {
             Album.create.bind(Album, {
               id: uuid(),
               artistId,
-              trackList: ['a', 'b']
+              trackList: ['a', 'b'],
+              releaseDate: new Date(Date.now() - 2 * YEAR)
             }),
             Album.create.bind(Album, {
               id: uuid(),
               artistId,
-              trackList: ['c', 'd']
+              trackList: ['c', 'd'],
+              releaseDate: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000)
             })
           ], next);
         }]
@@ -1015,6 +1018,21 @@ describe('Model', function () {
 
     it('can be invoked through an `iterate` method', async () => {
       await testIterable(() => Album.iterate({ conditions: { artistId } }));
+    });
+
+    it('applies any transform function', async () => {
+      Album.transform = before => ({
+        ...before,
+        newlyReleased: before.releaseDate.getTime() > (Date.now() - YEAR)
+      });
+
+      let newReleaseCount = 0;
+      for await (const album of Album.iterate({ conditions: { artistId } })) {
+        if (album.newlyReleased) {
+          newReleaseCount++;
+        }
+      }
+      assume(newReleaseCount).equals(1);
     });
 
     async function testIterable(iterateFn) {
