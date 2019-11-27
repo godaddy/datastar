@@ -26,13 +26,13 @@ describe('StatementBuilder', () => {
     it('should return an find ALL statement if given an empty object or no options', () => {
       const statement = builder.find({ type: 'find' }, {});
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist`);
     });
 
     it('should return an find ALL statement with allow-filtering included', () => {
       const statement = builder.find({ type: 'find', allowFiltering: true }, {});
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist ALLOW FILTERING');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist ALLOW FILTERING`);
     });
 
     it('should return an find statement with a field list if fields in options', () => {
@@ -49,18 +49,16 @@ describe('StatementBuilder', () => {
         limit: 2
       }, {});
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist LIMIT 2');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist LIMIT 2`);
     });
 
-    it('should return an error when passed conditions that get filtered (non primary keys)', () => {
-      const statement = builder.find({
+    it('should throw an error when passed conditions that get filtered (non primary keys)', () => {
+      assume(() => builder.find({
         type: 'find',
         conditions: {
           createDate: new Date()
         }
-      });
-
-      assume(statement).is.an.Error;
+      })).throws();
     });
 
     it('should return a find statement with query params', () => {
@@ -71,7 +69,7 @@ describe('StatementBuilder', () => {
         }
       });
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist WHERE artist_id <= ? AND artist_id > ?');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist WHERE artist_id <= ? AND artist_id > ?`);
       assume(statement.params.length).to.equal(2);
       assume(statement.params[0].value).to.equal('2345');
       assume(statement.params[1].value).to.equal('1234');
@@ -88,16 +86,14 @@ describe('StatementBuilder', () => {
       entity = clone(artistEntity);
     });
 
-    it('(Find test) should return an error when passed conditions with conflicting lookup tables', () => {
-      const statement = b.find({
+    it('(Find test) should throw an error when passed conditions with conflicting lookup tables', () => {
+      assume(() => b.find({
         type: 'single',
         conditions: {
           artistId: uuid.v4(),
           name: 'whatever'
         }
-      });
-
-      assume(statement).is.instanceof(Error);
+      })).throws();
     });
 
     it('should return a valid statement that uses the proper lookup table for find when querying by domainName', () => {
@@ -123,11 +119,11 @@ describe('StatementBuilder', () => {
       });
     });
 
-    it('should return a validation error when trying to create without all of the lookup tables', () => {
+    it('should throw a validation error when trying to create without all of the lookup tables', () => {
       const ent = clone(entity);
       delete ent.name;
-      const statement = b.create({}, ent);
-      assume(statement).is.instanceof(Error);
+
+      assume(() => b.create({}, ent)).throws();
     });
 
     function setupPrevious(entity) {
@@ -190,14 +186,12 @@ describe('StatementBuilder', () => {
       });
     });
 
-    it('should return an error when trying to delete with no conditions when there is a lookup table', () => {
-      const statement = b.remove({}, {});
-      assume(statement).is.instanceof(Error);
+    it('should throw an error when trying to delete with no conditions when there is a lookup table', () => {
+      assume(() => b.remove({}, {})).throws();
     });
 
-    it('should return an error FOR NOW when trying to delete with insufficient conditions', () => {
-      const statement = b.remove({}, { id: uuid.v4() });
-      assume(statement).is.instanceof(Error);
+    it('should throw an error FOR NOW when trying to delete with insufficient conditions', () => {
+      assume(() => b.remove({}, { id: uuid.v4() })).throws();
     });
   });
 
@@ -205,29 +199,25 @@ describe('StatementBuilder', () => {
   // This is also tested in cases within TableStatement
   //
   describe('AlterStatement', () => {
-    it('should return an error when given a bad type', () => {
-      const statement = builder.alter({ type: 'NANANANA' });
-
-      assume(statement).is.instanceof(Error);
+    it('should throw an error when given a bad type', () => {
+      assume(() => builder.alter({ type: 'NANANANA' })).throws();
     });
 
-    it('should return an error when given an unknown arg type', () => {
-      const statement = builder.alter({
+    it('should throw an error when given an unknown arg type', () => {
+      assume(() => builder.alter({
         type: 'table',
         actions: {
           something: new RegExp()
         }
-      });
-
-      assume(statement).is.instanceof(Error);
+      })).throws();
     });
   });
 
   describe('TableStatment { schema } valid', () => {
     let entity;
     it('build()', done => {
-      var schema = new Schema('artist', schemas.artist);
-      var builder = new StatementBuilder(schema);
+      const schema = new Schema('artist', schemas.artist);
+      const builder = new StatementBuilder(schema);
       const statement = builder.table({ type: 'ensure' });
       fs.readFile(path.join(fixturesDir, 'tables', 'artist.cql'), 'utf8', (err, data) => {
         assert(!err);
@@ -247,9 +237,9 @@ describe('StatementBuilder', () => {
         assume(options.lookupColumn.type).to.not.equal('map');
         assume(options.lookupColumn.type).to.not.equal('set');
         if (options.useIndex) {
-          tableName = schema.name + '_' + options.lookupKey;
+          tableName = `${schema.name}_${options.lookupKey}`;
         } else {
-          tableName = schema.name + '_by_' + options.lookupKey.replace(/_\w+$/, '');
+          tableName = `${schema.name}_by_${options.lookupKey.replace(/_\w+$/, '')}`;
         }
       }
 
@@ -276,13 +266,11 @@ describe('StatementBuilder', () => {
       assume(statement.cql.indexOf('WITH CLUSTERING ORDER BY (create_date);')).is.above(0);
     });
 
-    it('should return an error when given a bad key to orderBy', () => {
-      const statement = builder.table({
+    it('should throw an error when given a bad key to orderBy', () => {
+      assume(() => builder.table({
         type: 'ensure',
         orderBy: { key: 'createdAt' }
-      });
-
-      assume(statement).is.instanceof(Error);
+      })).throws();
     });
 
     it('should return a table statement with proper alterations', () => {
@@ -348,7 +336,7 @@ describe('StatementBuilder', () => {
       assume(cql).is.a('string');
       assume(cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
       // NOTE: Not a lookup table:
-      assume(cql.indexOf('on ' + schema.name + '(artist_id)')).is.above(-1);
+      assume(cql.indexOf(`on ${schema.name}(artist_id)`)).is.above(-1);
     });
 
     it('should return a proper TableStatement from build()', () => {
@@ -378,7 +366,7 @@ describe('StatementBuilder', () => {
       assume(statement.cql).is.a('string');
       assume(statement.cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
       // NOTE: Not a lookup table:
-      assume(statement.cql.indexOf('on ' + schema.name + '(artist_id)')).is.above(-1);
+      assume(statement.cql.indexOf(`on ${schema.name}(artist_id)`)).is.above(-1);
     });
 
     it('should return a proper TableStatement (lookup) from _compile()', () => {
@@ -392,7 +380,7 @@ describe('StatementBuilder', () => {
       const cql = compileTable(options, entity);
       assume(cql).is.a('string');
       assume(cql.indexOf('CREATE TABLE IF NOT EXISTS')).is.above(-1);
-      assume(cql.indexOf('PRIMARY KEY (' + options.lookupKey + ')')).is.above(-1);
+      assume(cql.indexOf(`PRIMARY KEY (${options.lookupKey})`)).is.above(-1);
     });
 
     it('should return a proper index TableStatement (lookup) from _compile()', () => {
@@ -406,7 +394,7 @@ describe('StatementBuilder', () => {
       const cql = compileTable(options, entity);
       assume(cql).is.a('string');
       assume(cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
-      assume(cql.indexOf('on ' + schema.name + '(' + options.lookupKey + ')')).is.above(-1);
+      assume(cql.indexOf(`on ${schema.name}(${options.lookupKey})`)).is.above(-1);
     });
 
     it('should return a proper TableStatement (lookup) from build()', () => {
@@ -421,7 +409,7 @@ describe('StatementBuilder', () => {
       assume(statement).to.not.be.instanceof(Error);
       assume(statement.cql).is.a('string');
       assume(statement.cql.indexOf('CREATE TABLE IF NOT EXISTS')).is.above(-1);
-      assume(statement.cql.indexOf('PRIMARY KEY (' + options.lookupKey + ')')).is.above(-1);
+      assume(statement.cql.indexOf(`PRIMARY KEY (${options.lookupKey})`)).is.above(-1);
     });
 
     it('should return a proper TableStatement for dropping the table from build()', () => {
@@ -458,7 +446,7 @@ describe('StatementBuilder', () => {
       assume(statement).is.not.instanceof(Error);
       assume(statement.cql).is.a('string');
       assume(statement.cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
-      assume(statement.cql.indexOf('on ' + schema.name + '(' + options.lookupKey + ')')).is.above(-1);
+      assume(statement.cql.indexOf(`on ${schema.name}(${options.lookupKey})`)).is.above(-1);
     });
   });
 
@@ -474,15 +462,12 @@ describe('StatementBuilder', () => {
       assume(statement.params[0].value).to.equal(id);
     });
 
-    it('should return an error when passed an entity without a primary key', () => {
-      const statement = builder.remove({}, { createDate: new Date() });
-
-      assume(statement).is.an.Error;
+    it('should throw an error when passed an entity without a primary key', () => {
+      assume(() => builder.remove({}, { createDate: new Date() })).throws();
     });
 
-    it('should return an error when passed empty conditions ', () => {
-      const statement = builder.remove({}, {});
-      assume(statement).is.an.Error;
+    it('should throw an error when passed empty conditions ', () => {
+      assume(() => builder.remove({}, {})).throws();
     });
 
     it('should return a proper RemoveStatement when passed a set of conditions', () => {
@@ -549,11 +534,10 @@ describe('StatementBuilder', () => {
       assume(statement.cql).contains('USING TTL 864342');
     });
 
-    it('should return an error when given an improper entity', () => {
+    it('should throw an error when given an improper entity', () => {
       const ent = clone(entity);
       delete ent.artistId;
-      const statement = builder.create({}, ent);
-      assume(statement).is.instanceof(Error);
+      assume(() => builder.create({}, ent)).throws();
     });
   });
 });

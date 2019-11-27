@@ -1,9 +1,11 @@
 {
   "cassandra": {
-    "user": "cassandra",
-    "password": "cassandra",
+    "credentials": {
+      "username": "cassandra",
+      "password": "cassandra"
+    },
     "keyspace": "datastar",
-    "hosts": ["127.0.0.1"],
+    "contactPoints": ["127.0.0.1"],
     "localDataCenter": "datacenter1"
   }
 }

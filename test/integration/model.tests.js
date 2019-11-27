@@ -1,6 +1,8 @@
 /* jshint camelcase: false */
 
-const assume = require('assume'),
+const
+  { Stream } = require('stream'),
+  assume     = require('assume'),
   uuid       = require('uuid'),
   async      = require('async'),
   clone      = require('clone'),
@@ -17,10 +19,6 @@ describe('Model', function () {
     helpers.load((err, data) => {
       assume(err).to.equal(null);
       datastar = helpers.connectDatastar({ config: data.cassandra }, Datastar, done);
-      /* cassandra = new driver.Client({
-       contactPoints: data.cassandra.hosts,
-       keyspace: data.cassandra.keyspace
-       });*/
     });
   });
 
@@ -179,7 +177,7 @@ describe('Model', function () {
         async.waterfall([
           Artist.find.bind(Artist, findOptions),
           (result, next) => {
-            var res = result[0];
+            const res = result[0];
             assume(result.length).to.equal(1);
             assume(res.id).to.be.a('string');
             assume(res.name).to.be.a('string');
@@ -558,9 +556,9 @@ describe('Model', function () {
         ids = {};
       }
       async.parallel({
-        otherId: Song.findOne.bind(Song, { conditions: { otherId: ids.otherId || otherId }}),
-        uniqueId: Song.findOne.bind(Song, { conditions: { uniqueId: ids.uniqueId || uniqueId }}),
-        id: Song.findOne.bind(Song, { conditions: { id: ids.id || id }})
+        otherId: Song.findOne.bind(Song, { conditions: { otherId: ids.otherId || otherId } }),
+        uniqueId: Song.findOne.bind(Song, { conditions: { uniqueId: ids.uniqueId || uniqueId } }),
+        id: Song.findOne.bind(Song, { conditions: { id: ids.id || id } })
       }, callback);
     }
 
@@ -806,7 +804,7 @@ describe('Model', function () {
         fooId: three,
         secondaryId: zeros,
         nullableId: zeros
-      }, ttl: 3 }, err => {
+      }, ttl: 1 }, err => {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: three, secondaryId: zeros }, (error, res) => {
@@ -819,7 +817,7 @@ describe('Model', function () {
               assume(result).is.falsey();
               done();
             });
-          }, 3000);
+          }, 1100);
         });
       });
     });
@@ -840,7 +838,7 @@ describe('Model', function () {
               assume(result.fooId).equals(four);
               done();
             });
-          }, 3000);
+          }, 100);
         });
       });
     });
@@ -881,7 +879,7 @@ describe('Model', function () {
     });
 
     it('should update a record in the database with an updated reset ttl and can be found before it reaches the updated ttl', done => {
-      Foo.update({ entity: { fooId: seven, secondaryId: one, something: 'boo' }, ttl: 3 }, err => {
+      Foo.update({ entity: { fooId: seven, secondaryId: one, something: 'boo' }, ttl: 1 }, err => {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: seven, secondaryId: one }, (error, result) => {
@@ -899,14 +897,14 @@ describe('Model', function () {
                 assume(res.fooId).equals(seven);
                 done();
               });
-            }, 5000);
+            }, 1100);
           });
         });
       });
     });
 
     it('should update a record in the database with an updated reset ttl and expire after it reaches the updated ttl', done => {
-      Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'boo' }, ttl: 2 }, err => {
+      Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'boo' }, ttl: 1 }, err => {
         assume(err).is.falsey();
 
         Foo.findOne({ fooId: eight, secondaryId: one }, (error, result) => {
@@ -914,7 +912,7 @@ describe('Model', function () {
           assume(result);
           assume(result.fooId).equals(eight);
 
-          Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'foo' }, ttl: 3 }, error => {
+          Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'foo' }, ttl: 1 }, error => {
             assume(error).is.falsey();
 
             setTimeout(() => {
@@ -923,7 +921,7 @@ describe('Model', function () {
                 assume(res).is.falsey();
                 done();
               });
-            }, 3000);
+            }, 1100);
           });
         });
       });
@@ -976,6 +974,80 @@ describe('Model', function () {
         next();
       });
     });
+  });
+
+  describe('async iterable functionality', () => {
+    let artistId, Album;
+    const YEAR = 365 * 24 * 60 * 60 * 1000;
+
+    before(done => {
+      artistId = uuid();
+      Album = datastar.define('album', { schema: schemas.album });
+
+      async.auto({
+        tableCreated: next => Album.ensureTables(next),
+        createRows: ['tableCreated', next => {
+          async.parallel([
+            Album.create.bind(Album, {
+              id: uuid(),
+              artistId,
+              trackList: ['a', 'b'],
+              releaseDate: new Date(Date.now() - 2 * YEAR)
+            }),
+            Album.create.bind(Album, {
+              id: uuid(),
+              artistId,
+              trackList: ['c', 'd'],
+              releaseDate: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000)
+            })
+          ], next);
+        }]
+      }, done);
+    });
+
+    after(done => {
+      Album.dropTables(done);
+    });
+
+    it('can be invoked through an `iterable` flag sent to `find`', async () => {
+      await testIterable(() => Album.findAll({
+        conditions: { artistId },
+        iterable: true
+      }));
+    });
+
+    it('can be invoked through an `iterate` method', async () => {
+      await testIterable(() => Album.iterate({ conditions: { artistId } }));
+    });
+
+    it('applies any transform function', async () => {
+      Album.transform = before => ({
+        ...before,
+        newlyReleased: before.releaseDate.getTime() > (Date.now() - YEAR)
+      });
+
+      let newReleaseCount = 0;
+      for await (const album of Album.iterate({ conditions: { artistId } })) {
+        if (album.newlyReleased) {
+          newReleaseCount++;
+        }
+      }
+      assume(newReleaseCount).equals(1);
+    });
+
+    async function testIterable(iterateFn) {
+      const iterable = iterateFn();
+      assume(iterable).not.instanceof(Stream);
+      let allTracks = [];
+      for await (const album of iterable) {
+        allTracks = allTracks.concat(album.trackList);
+      }
+      const trackSet = new Set(allTracks);
+      assume(trackSet.has('a')).equals(true);
+      assume(trackSet.has('b')).equals(true);
+      assume(trackSet.has('c')).equals(true);
+      assume(trackSet.has('d')).equals(true);
+    }
   });
 
   function find(Entity, id, callback) {

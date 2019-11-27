@@ -1,9 +1,10 @@
-var path    = require('path'),
+const
+  path      = require('path'),
   util      = require('util'),
   Datastar  = require('../../lib'),
   cassandra = require('cassandra-driver');
 
-var model = Datastar.Model;
+const model = Datastar.Model;
 
 /*
  * @param {configs} Object
@@ -30,16 +31,16 @@ exports.load = function (env, callback) {
   }
 
   function createKeyspace(data) {
-    var client = new cassandra.Client({
-      contactPoints: data.cassandra.hosts,
+    const client = new cassandra.Client({
+      contactPoints: data.cassandra.contactPoints,
       localDataCenter: data.cassandra.localDataCenter,
       authProvider: new cassandra.auth.PlainTextAuthProvider(
-        data.cassandra.user,
-        data.cassandra.password
+        data.cassandra.credentials.username,
+        data.cassandra.credentials.password
       )
     });
 
-    client.execute('CREATE KEYSPACE IF NOT EXISTS ' + data.cassandra.keyspace + ' WITH replication = {\'class\' : \'SimpleStrategy\', \'replication_factor\' : 1};', function (err) {
+    client.execute(`CREATE KEYSPACE IF NOT EXISTS ${data.cassandra.keyspace} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};`, function (err) {
       if (err) return callback(err);
       client.shutdown();
       setConfig(data);
@@ -60,7 +61,7 @@ exports.load = function (env, callback) {
   // If `DATASTAR_CONFIG` is set then load from
   // that file.
   //
-  var configFile = process.env.DATASTAR_CONFIG || path.join(__dirname, '..', 'config', 'config.example.json');
+  const configFile = process.env.DATASTAR_CONFIG || path.join(__dirname, '..', 'config', 'config.example.json');
 
   return createKeyspace(require(configFile));
 };
@@ -100,6 +101,7 @@ exports.connectDatastar = function (opts, Proto, callback) {
  */
 exports.stubModel = function (sinon) {
   model.before = sinon.stub();
+  model.waterfall = sinon.stub();
   model.ensureTables = sinon.stub();
 
   return model;

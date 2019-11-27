@@ -43,19 +43,21 @@ This module is open source! That means **we want your contributions!**
 ## Usage
 
 ``` js
-var Datastar = require('datastar');
-var datastar = new Datastar({
+const Datastar = require('datastar');
+const datastar = new Datastar({
   config: {
-    user: 'cassandra',
-    password: 'cassandra',
+    credentials: {
+      username: 'cassandra',
+      password: 'cassandra'
+    },
     keyspace: 'a_fancy_keyspace',
-    hosts: ['127.0.0.1', 'host2', 'host3']
+    contactPoints: ['127.0.0.1', 'host2', 'host3']
   }
 }).connect();
 
-var cql = datastar.schema.cql;
+const cql = datastar.schema.cql;
 
-var Artist = datastar.define('artist', {
+const Artist = datastar.define('artist', {
   schema: datastar.schema.object({
     artist_id: cql.uuid(),
     name: cql.text(),
@@ -93,17 +95,19 @@ Artist.create({
 All constructor options are passed directly to [Priam](https://github.com/godaddy/node-priam) so any options Priam supports, Datastar supports.
 
 ```js
-var Datastar = require('datastar');
-var datastar = new Datastar({
+const Datastar = require('datastar');
+const datastar = new Datastar({
   config: {
-    // who am I connecting as
-    user: 'cassandra',
-    // what's my password
-    password: 'cassandra',
+    credentials: {
+      // who am I connecting as
+      username: 'cassandra',
+      // what's my password
+      password: 'cassandra'
+    },
     // what keyspace am I using
     keyspace: 'a_fancy_keyspace',
     // what cluster hosts do I know about
-    hosts: ['127.0.0.1', 'host2', 'host3']
+    contactPoints: ['127.0.0.1', 'host2', 'host3']
   }
 });
 ```
@@ -113,7 +117,7 @@ var datastar = new Datastar({
 Given a set of cassandra information, connect to the cassandra constructor. **This must be called before you do any model creation, finding, schema defintion, etc.**
 
 ```js
-var datastar = new Datastar(...);
+let datastar = new Datastar(...);
 // I setup the connection, but I'm not connected yet, let's connect!
 datastar = datastar.connect();
 ```
@@ -127,7 +131,7 @@ Define is the primary way to create `Models` while using Datastar. See the follo
 //
 // main definition function, pass a name of the model (table), and it's corresponding schema
 //
-var Album = datastar.define('album', {
+const Album = datastar.define('album', {
   //
   // ensure that the table exists. This executes an implicit CREATE IF NOT EXISTS
   // statement. You can listen for completio using the `ensure-tables:finished`
@@ -180,7 +184,7 @@ otherwise you can go more granular with `readConsistency` and
 corresponds with a consistency that cassandra allows.
 
 ```js
-var Album = datastar.define('album', {
+const Album = datastar.define('album', {
   schema: albumSchema,
   readConsistency: 'localQuorum',
   writeConsitency: 'one'
@@ -275,7 +279,7 @@ CQL Data Type | Validation Type
 This functionality that we built into `datastar` exists in order to optimize queries for other unique keys on your main table. By default Cassandra has the ability to do this for you by building an index for that key. The only problem is that the current backend storage of Cassandra can make these very slow and under performant. If this is a high traffic query pattern, this could lead you to having issues with your database. We work around this limitation by simply creating more tables and doing an extra write to the database. Since Cassandra is optimized for handling a heavy write workload, this becomes trivial. We take care of the complexity of keeping these tables in sync for you. Lets look at an example by modifying our `Artist` model.
 
 ```js
-var Artist = datastar.define('artist', {
+const Artist = datastar.define('artist', {
   schema: datastar.schema.object({
     artist_id: cql.uuid(),
     name: cql.text(),
@@ -293,8 +297,7 @@ var Artist = datastar.define('artist', {
     }
   }
 });
-
- ```
+```
 
 In our example above we added `name` as a `lookupKey` to our `Artist` model. This means a few things:
 
@@ -317,15 +320,14 @@ Artist.findOne({
 });
 ```
 
-
 ### Model.create
 
 Once you have created a `Model` using `datastar.define` you can start creating records against the Cassandra database you have configured in your options or passed to `datastar.connect`:
 
 ``` js
-var cql = datastar.schema.cql;
+const cql = datastar.schema.cql;
 
-var Beverage = datastar.define('beverage', {
+const Beverage = datastar.define('beverage', {
   schema: datastar.schema.object({
     'beverage_id': cql.uuid({ default: 'v4' }),
     'name': cql.text(),
@@ -358,8 +360,7 @@ Model.create({ entities: properties });
 
 // Create a two models: one with properties
 // and the second with properties2
-Model.create({ entities [properties, properties2] })
-
+Model.create({ entities: [properties, properties2] })
 ```
 
 ### Model.update
@@ -431,7 +432,7 @@ table has changed.
  > understand this warning or the implications, please post an issue.
 
 ```js
-var Person = datastar.define('person', {
+const Person = datastar.define('person', {
   ensureTables: true,
   schema: datastar.schema.object({
     person_id: datastar.schema.cql.uuid({ default: 'v4' }),
@@ -452,7 +453,7 @@ var Person = datastar.define('person', {
 //
 // person Object
 //
-var person = {
+const person = {
   name: 'Fred Flinstone',
   attributes: {
     height: '6 foot 1 inch'
@@ -658,7 +659,7 @@ those records as they come instead of waiting to buffer them all into memory.
 For example, if we were doing this inside a request handler:
 
 ```js
-var through = require('through2');
+const { Transform } = require('stream');
 
 //
 // Fetch sodas handler
@@ -672,13 +673,33 @@ function handler(req, res) {
     res.writeHead(500);
     res.end(JSON.stringify({ error: err.message }));
   })
-  .pipe(through.obj(function (bev, enc, callback) {
-    //
-    // Massage the beverage object in some way before returning it to the user
-    //
-    callback(null, massageBeverage(bev));
+  .pipe(new Transform({
+    writableObjectMode: true,
+    readableObjectMode: true,
+    transform(bev, enc, callback) {
+      //
+      // Massage the beverage object in some way before returning it to the user
+      //
+      callback(null, massageBeverage(bev));
+    }
   }))
   .pipe(res);
+}
+```
+
+#### Async Iterable API
+
+The async iterable API, like the stream API, provides another convenient way to process records as they come in. If you do not need the full feature set of node streams, this is a more efficient technique.
+
+To access the async iterable API, set the `iterable` option to `true` in your call to `.find()` or `.findAll()`. Alternately, call the `.iterate()` method of your model, which is equivalent to `.findAll({ ..., iterable: true })`.
+
+```js
+async function getAllArtistTracks(artistId) {
+  let allTracks = [];
+  for await (const album of Album.iterate({ conditions: { artistId } })) {
+    allTracks = allTracks.concat(album.trackList);
+  }
+  return new Set(allTracks);
 }
 ```
 
@@ -753,12 +774,11 @@ that allow you to hook into and  modify the execution of a given statement. Firs
 This provides a way to add extensibility to any operation you perform on a
 specific `model`. Lets take a look at what this could look like.
 
+Before build is before we create the `statement(s)` that we then collect to
+execute and insert into Cassandra. This allows us to modify any of the
+entities before CQL is generated for them.
+
 ```js
-//
-// Before build is before we create the `statement(s)` that we then collect to
-// execute and insert into Cassandra. This allows us to modify any of the
-// entities before CQL is generated for them
-//
 Beverage.before('create:build', function (options, callback) {
   //
   // We create our own option that gets passed in by the beverage option that
@@ -787,15 +807,16 @@ Beverage.before('create:build', function (options, callback) {
   //
   callback();
 });
+```
 
-//
-// Before execute is right before we actually send the statements to cassandra!
-// This is where we have a chance to modify the statements or
-// `StatementCollection` with any other statements we may have or even to just
-// the `consistency` we are asking of cassandra if there is only a narrow case
-// where you require a consistency of `one`. (You could also just pass
-// option.consistency into the function call as well)
-//
+Before execute is right before we actually send the statements to cassandra.
+This is where we have a chance to modify the statements or
+`StatementCollection` with any other statements we may have or even to just
+the `consistency` we are asking of cassandra if there is only a narrow case
+where you require a consistency of `one`. (You could also just pass
+option.consistency into the function call as well)
+
+```js
 Beverage.before('create:execute', function (options, callback) {
   if (options.commitFast) {
     options.statements.consistency('one');
@@ -808,16 +829,17 @@ Beverage.before('create:execute', function (options, callback) {
 
   callback();
 });
+```
 
-//
-// An `after` hook might for `execute` might look like this if we wanted to
-// insert the same data into a separate keyspace using a different `Priam`
-// instance. Which would be a separate connection to cassandra. This call is
-// ensured to be executed before the `Beverage.create(opts, callback)` function
-// calls its callback.
-// NOTE: This assumes the same columns exist in this other keyspace
-//
-var otherDataCenterConnection = new Priam(connectOpts);
+An `after` hook for `execute` might look like this if we wanted to
+insert the same data into a separate keyspace using a different `Priam`
+instance. Which would be a separate connection to cassandra. This call is
+ensured to be executed before the `Beverage.create(opts, callback)` function
+calls its callback.
+NOTE: This assumes the same columns exist in this other keyspace
+
+```js
+const otherDataCenterConnection = new Priam(connectOpts);
 Beverage.after('create:execute', function (options, callback) {
   //
   // Reuse the statement collection from the create operation to execute the
@@ -827,23 +849,23 @@ Beverage.after('create:execute', function (options, callback) {
 
   options.statements.execute(callback);
 });
+```
 
-//
-// The last type of hook we have is for the specific `find` operations
-// including. `find:all`, `find:one`, `find:count`, `find:first`. These specifc
-// are the same as the above `:build` hooks in when they execute but have
-// different and more useful semantics for `after` hooks for modifying data
-// fetched. This makes use of [`Understudy's`][understudy] `.waterfall`
-// function.
-//
+The last types of hook we have is for the specific `find` operations
+including. `find:all`, `find:one`, `find:count`, `find:first`. These specifc
+are the same as the above `:build` hooks in when they execute but have
+different and more useful semantics for `after` hooks for modifying data
+fetched. This makes use of [`Understudy's`][understudy] `.waterfall`
+function. An important caveat is that `find` hooks are _not_ executed when you
+use the streaming option. If you want to convert all records from your queries, see [Record Transformation](#record-transformation) for a technique that works for all types of queries.
 
-//
-// The after hooks on `find:one` allow us to mutate the result returned from any
-// `findOne` query taken on beverage. This could allow us to call an external
-// service to fetch extra properties or anything else you can think of. The main
-// goal is to provide the extensibility to do what you want without `datastar`
-// getting in your way.
-//
+This after hooks on `find:one` allow us to mutate the result returned from any
+`findOne` query taken on beverage. This could allow us to call an external
+service to fetch extra properties or anything else you can think of. The main
+goal is to provide the extensibility to do what you want without `datastar`
+getting in your way.
+
+```js
 Beverage.after('find:one', function (result, callback) {
   //
   // Populate associated sibling models on every `findOne` or `get` query
@@ -857,12 +879,12 @@ Beverage.after('find:one', function (result, callback) {
     callback()
   });
 });
+```
 
-//
-// We can even add another after hook after this one which will get executed in
-// series and be able to modify any new attributes!
-//
+We can even add another after hook after this one which will get executed in
+series and be able to modify any new attributes!
 
+```js
 Beverage.after('find:one', function (result, callback) {
   //
   // Now that siblings are populated, modify their siblings if they arent
@@ -875,7 +897,7 @@ Beverage.after('find:one', function (result, callback) {
     //
     // TODO: Have instance functions for this type of thing
     //
-    var update = bev.toJSON();
+    const update = bev.toJSON();
     //
     // Do the more efficient update to cassandra on the `set` type.
     //
@@ -892,9 +914,18 @@ Beverage.after('find:one', function (result, callback) {
     result.siblings = res;
     callback();
   });
-
 });
+```
 
+### Record Transformation
+
+Assign a `transform` method to your model to synchronously modify all records coming back from a query; this technique works for the callback, streaming, or async iterable methods of querying:
+
+```js
+Beverage.transform = before => ({
+  ...before,
+  isDiet: before.sugar <= 0
+})
 ```
 
 ### Create tables
@@ -903,7 +934,7 @@ Each `Model` is capable of creating the Cassandra tables associated with its `sc
 To ensure that a table is created you can pass the `ensureTables` option:
 
 ```js
-var Spice = datastar.define('spice', {
+const Spice = datastar.define('spice', {
   ensureTables: true,
   schema: /* a valid schema */
 })
@@ -1074,5 +1105,6 @@ npm run coverage
 - [Steve Commisso](https://github.com/scommisso)
 - [Joe Junker](https://github.com/JosephJNK)
 - [Bill Enterline](https://github.com/enterline)
+- [Jacob Page](https://github.com/DullReferenceException)
 
 [understudy]: https://github.com/bmeck/understudy

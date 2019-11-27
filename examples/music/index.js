@@ -10,17 +10,17 @@ const stringify = require('stringify-stream');
 // Setup connection and instances, it will lazily connect since
 // we are just using a simple http server
 //
-var datastar = new Datastar({
+const datastar = new Datastar({
   config: require('./config')
 }).connect();
 
-var models = require('./models')(datastar);
+const models = require('./models')(datastar);
 
-var stringifyOpts = { open: '[', close: ']' };
+const stringifyOpts = { open: '[', close: ']' };
 
 http.createServer(function respond(req, res) {
-  var parsed = url.parse(req.url);
-  var params = qs.parse(parsed.query);
+  const parsed = url.parse(req.url);
+  const params = qs.parse(parsed.query);
 
   //
   // Naive routes that just return all of a given resource
