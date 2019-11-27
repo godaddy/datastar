@@ -40,7 +40,7 @@ exports.load = function (env, callback) {
       )
     });
 
-    client.execute('CREATE KEYSPACE IF NOT EXISTS ' + data.cassandra.keyspace + ' WITH replication = {\'class\' : \'SimpleStrategy\', \'replication_factor\' : 1};', function (err) {
+    client.execute(`CREATE KEYSPACE IF NOT EXISTS ${data.cassandra.keyspace} WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};`, function (err) {
       if (err) return callback(err);
       client.shutdown();
       setConfig(data);

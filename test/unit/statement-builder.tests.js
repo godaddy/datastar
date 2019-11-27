@@ -26,13 +26,13 @@ describe('StatementBuilder', () => {
     it('should return an find ALL statement if given an empty object or no options', () => {
       const statement = builder.find({ type: 'find' }, {});
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist`);
     });
 
     it('should return an find ALL statement with allow-filtering included', () => {
       const statement = builder.find({ type: 'find', allowFiltering: true }, {});
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist ALLOW FILTERING');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist ALLOW FILTERING`);
     });
 
     it('should return an find statement with a field list if fields in options', () => {
@@ -49,7 +49,7 @@ describe('StatementBuilder', () => {
         limit: 2
       }, {});
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist LIMIT 2');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist LIMIT 2`);
     });
 
     it('should throw an error when passed conditions that get filtered (non primary keys)', () => {
@@ -69,7 +69,7 @@ describe('StatementBuilder', () => {
         }
       });
 
-      assume(statement.cql).to.equal('SELECT ' + fieldList + ' FROM artist WHERE artist_id <= ? AND artist_id > ?');
+      assume(statement.cql).to.equal(`SELECT ${fieldList} FROM artist WHERE artist_id <= ? AND artist_id > ?`);
       assume(statement.params.length).to.equal(2);
       assume(statement.params[0].value).to.equal('2345');
       assume(statement.params[1].value).to.equal('1234');
@@ -237,9 +237,9 @@ describe('StatementBuilder', () => {
         assume(options.lookupColumn.type).to.not.equal('map');
         assume(options.lookupColumn.type).to.not.equal('set');
         if (options.useIndex) {
-          tableName = schema.name + '_' + options.lookupKey;
+          tableName = `${schema.name}_${options.lookupKey}`;
         } else {
-          tableName = schema.name + '_by_' + options.lookupKey.replace(/_\w+$/, '');
+          tableName = `${schema.name}_by_${options.lookupKey.replace(/_\w+$/, '')}`;
         }
       }
 
@@ -336,7 +336,7 @@ describe('StatementBuilder', () => {
       assume(cql).is.a('string');
       assume(cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
       // NOTE: Not a lookup table:
-      assume(cql.indexOf('on ' + schema.name + '(artist_id)')).is.above(-1);
+      assume(cql.indexOf(`on ${schema.name}(artist_id)`)).is.above(-1);
     });
 
     it('should return a proper TableStatement from build()', () => {
@@ -366,7 +366,7 @@ describe('StatementBuilder', () => {
       assume(statement.cql).is.a('string');
       assume(statement.cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
       // NOTE: Not a lookup table:
-      assume(statement.cql.indexOf('on ' + schema.name + '(artist_id)')).is.above(-1);
+      assume(statement.cql.indexOf(`on ${schema.name}(artist_id)`)).is.above(-1);
     });
 
     it('should return a proper TableStatement (lookup) from _compile()', () => {
@@ -380,7 +380,7 @@ describe('StatementBuilder', () => {
       const cql = compileTable(options, entity);
       assume(cql).is.a('string');
       assume(cql.indexOf('CREATE TABLE IF NOT EXISTS')).is.above(-1);
-      assume(cql.indexOf('PRIMARY KEY (' + options.lookupKey + ')')).is.above(-1);
+      assume(cql.indexOf(`PRIMARY KEY (${options.lookupKey})`)).is.above(-1);
     });
 
     it('should return a proper index TableStatement (lookup) from _compile()', () => {
@@ -394,7 +394,7 @@ describe('StatementBuilder', () => {
       const cql = compileTable(options, entity);
       assume(cql).is.a('string');
       assume(cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
-      assume(cql.indexOf('on ' + schema.name + '(' + options.lookupKey + ')')).is.above(-1);
+      assume(cql.indexOf(`on ${schema.name}(${options.lookupKey})`)).is.above(-1);
     });
 
     it('should return a proper TableStatement (lookup) from build()', () => {
@@ -409,7 +409,7 @@ describe('StatementBuilder', () => {
       assume(statement).to.not.be.instanceof(Error);
       assume(statement.cql).is.a('string');
       assume(statement.cql.indexOf('CREATE TABLE IF NOT EXISTS')).is.above(-1);
-      assume(statement.cql.indexOf('PRIMARY KEY (' + options.lookupKey + ')')).is.above(-1);
+      assume(statement.cql.indexOf(`PRIMARY KEY (${options.lookupKey})`)).is.above(-1);
     });
 
     it('should return a proper TableStatement for dropping the table from build()', () => {
@@ -446,7 +446,7 @@ describe('StatementBuilder', () => {
       assume(statement).is.not.instanceof(Error);
       assume(statement.cql).is.a('string');
       assume(statement.cql.indexOf('CREATE INDEX IF NOT EXISTS')).is.above(-1);
-      assume(statement.cql.indexOf('on ' + schema.name + '(' + options.lookupKey + ')')).is.above(-1);
+      assume(statement.cql.indexOf(`on ${schema.name}(${options.lookupKey})`)).is.above(-1);
     });
   });
 
