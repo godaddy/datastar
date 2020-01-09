@@ -3,7 +3,9 @@
   "version": "4.0.0",
   "description": "Now witness the power of this FULLY ARMED AND OPERATIONAL DATASTAR!",
   "main": "lib",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "async": "^1.5.0",
     "clone": "^1.0.4",
