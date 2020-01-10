@@ -1,5 +1,7 @@
 # Changelog
 
+## 4.0.1
+
 Fixes:
 - Bring back the publishing of `datastar/test` libraries used in some consumers' unit tests.
 
