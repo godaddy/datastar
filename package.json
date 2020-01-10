@@ -5,7 +5,7 @@
   "main": "lib",
   "files": [
     "lib",
-    "test/hepers",
+    "test/helpers",
     "test/mocks"
   ],
   "dependencies": {
