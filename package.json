@@ -14,7 +14,7 @@
     "joi-of-cql": "^2.0.2",
     "lodash.pick": "^4.0.1",
     "object-assign": "^4.0.1",
-    "priam": "^4.0.0-beta.2",
+    "priam": "^4.0.1",
     "tinythen": "^1.0.1",
     "to-camel-case": "^1.0.0",
     "to-snake-case": "^1.0.0",
