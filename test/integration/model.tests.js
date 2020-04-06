@@ -909,7 +909,8 @@ describe('Model', function () {
 
         Foo.findOne({ fooId: eight, secondaryId: one }, (error, result) => {
           assume(error).is.falsey();
-          assume(result);
+          assume(result).it.not.falsey();
+          assume(result).is.type('object');
           assume(result.fooId).equals(eight);
 
           Foo.update({ entity: { fooId: eight, secondaryId: one, something: 'foo' }, ttl: 1 }, error => {
