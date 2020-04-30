@@ -19,7 +19,8 @@
     "to-camel-case": "^1.0.0",
     "to-snake-case": "^1.0.0",
     "understudy": "^4.1.0",
-    "uuid": "^2.0.1"
+    "uuid": "^2.0.1",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "assume": "^2.1.0",
@@ -40,7 +41,9 @@
     "coverage": "nyc npm run mocha",
     "pretest": "npm run lint",
     "lint": "eslint-godaddy lib/ test/",
-    "test": "npm run coverage"
+    "test": "npm run coverage",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -58,5 +61,6 @@
     "node": "^10.17.0 || >=12.3.0"
   },
   "author": "GoDaddy Engineers",
-  "license": "MIT"
+  "license": "MIT",
+  "snyk": true
 }
