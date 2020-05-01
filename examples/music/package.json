@@ -5,12 +5,16 @@
   "main": "index.js",
   "dependencies": {
     "datastar": "~1.0.0",
-    "stringify-stream": "~1.0.5"
+    "stringify-stream": "~1.0.5",
+    "snyk": "^1.316.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "snyk": true
 }
