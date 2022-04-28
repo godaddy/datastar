@@ -9,7 +9,7 @@
     "test/mocks"
   ],
   "dependencies": {
-    "async": "^1.5.0",
+    "async": "^2.6.4",
     "clone": "^1.0.4",
     "joi-of-cql": "^2.0.2",
     "lodash.pick": "^4.0.1",
