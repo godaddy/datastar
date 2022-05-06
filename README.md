@@ -1093,6 +1093,13 @@ npm test
 npm run coverage
 ```
 
+The integration tests expect a locally-running Cassandra instance at 127.0.0.1 with port 9042 open. If you have `docker`, you can run a server with the following commands:
+
+```shell
+docker pull cassandra:latest
+docker run --name cass_cluster -p 9042:9042 cassandra:latest
+```
+
 ## Contributors
 
 - [Christopher Jeffrey](https://github.com/chjj)

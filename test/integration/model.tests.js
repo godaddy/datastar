@@ -987,20 +987,20 @@ describe('Model', function () {
 
       async.auto({
         tableCreated: next => Album.ensureTables(next),
-        createRows: ['tableCreated', next => {
+        createRows: ['tableCreated', (_, next) => {
           async.parallel([
-            Album.create.bind(Album, {
+            cb => Album.create({
               id: uuid(),
               artistId,
               trackList: ['a', 'b'],
               releaseDate: new Date(Date.now() - 2 * YEAR)
-            }),
-            Album.create.bind(Album, {
+            }, cb),
+            cb => Album.create({
               id: uuid(),
               artistId,
               trackList: ['c', 'd'],
               releaseDate: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000)
-            })
+            }, cb)
           ], next);
         }]
       }, done);
