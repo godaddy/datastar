@@ -987,7 +987,7 @@ describe('Model', function () {
 
       async.auto({
         tableCreated: next => Album.ensureTables(next),
-        createRows: ['tableCreated', next => {
+        createRows: ['tableCreated', (results, next) => {
           async.parallel([
             Album.create.bind(Album, {
               id: uuid(),
