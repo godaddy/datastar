@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.3
+
+Fixes:
+- Bump vulnerable packages
+
 ## 4.0.1
 
 Fixes:
