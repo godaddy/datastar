@@ -12,7 +12,6 @@
     "async": "^3.2.4",
     "clone": "^1.0.4",
     "joi-of-cql": "^2.0.4",
-    "lodash": "^4.17.21",
     "object-assign": "^4.0.1",
     "priam": "^4.0.0",
     "tinythen": "^1.0.1",
