@@ -12,7 +12,6 @@
     "async": "^3.2.4",
     "clone": "^1.0.4",
     "joi-of-cql": "^2.0.4",
-    "lodash.pick": "^4.0.1",
     "object-assign": "^4.0.1",
     "priam": "^4.0.0",
     "tinythen": "^1.0.1",
@@ -29,7 +28,7 @@
     "eslint-config-godaddy": "^7.0.0",
     "lodash.clonedeep": "^4.5.0",
     "mocha": "^10.2.0",
-    "nyc": "^14.1.1",
+    "nyc": "^15.1.0",
     "proxyquire": "^1.7.3",
     "sinon": "^1.17.2"
   },
