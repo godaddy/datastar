@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "datastar": "~1.0.0",
+    "datastar": "~1.7.0",
     "stringify-stream": "~1.0.5"
   },
   "scripts": {
